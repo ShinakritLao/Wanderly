@@ -12,12 +12,14 @@ import {
   Dimensions
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { mockReviews, mockPlaces } from '../data/mockData';
+import { mockReviews } from '../data/mockData';
+import { useFavorites } from '../context/FavoritesContext';
 
 const { width } = Dimensions.get('window');
 
 const Home = () => {
   const [searchText, setSearchText] = useState('');
+  const { places, toggleFavorite } = useFavorites();
 
   const ReviewCard = ({ item }) => (
     <View style={styles.reviewCard}>
@@ -47,8 +49,16 @@ const Home = () => {
     <View style={styles.placeCard}>
       <Image source={{ uri: item.image }} style={styles.placeImage} />
       <View style={styles.placeOverlay}>
-        <TouchableOpacity style={styles.heartButton}>
-          <Text style={styles.heartIcon}>❤</Text>
+        <TouchableOpacity 
+          style={styles.heartButton}
+          onPress={() => toggleFavorite(item.id)}
+        >
+          <Feather
+            name="heart"
+            size={20}
+            color={item.favorite === 1 ? '#FF0000' : '#FFF'}
+            fill={item.favorite === 1 ? '#FF0000' : 'transparent'}
+          />
         </TouchableOpacity>
         <View style={styles.placeInfo}>
           <Text style={styles.placeTitle}>{item.name}</Text>
@@ -102,7 +112,7 @@ const Home = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recommended places</Text>
           <View style={styles.placesContainer}>
-            {mockPlaces.slice(0, 4).map((place, index) => (
+            {places.map((place, index) => (
               <View key={place.id} style={[
                 styles.placeCardWrapper,
                 index % 2 === 0 ? styles.leftCard : styles.rightCard
@@ -266,10 +276,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  heartIcon: {
-    fontSize: 18,
-    color: '#FFF',
   },
   pinIcon: {
     fontSize: 10,

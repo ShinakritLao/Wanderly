@@ -33,17 +33,17 @@ const AppNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Add"
+        name="Tinder"
         component={Tinder}
         options={{
-          tabBarLabel: 'Add',
+          tabBarLabel: 'Tinder',
         }}
       />
       <Tab.Screen
-        name="Share"
+        name="Folder"
         component={Folder}
         options={{
-          tabBarLabel: 'Share',
+          tabBarLabel: 'Folder',
         }}
       />
       <Tab.Screen
