@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Wanderly",
-    "slug": "Wanderly",
+    "slug": "wanderly",
+    "scheme": "wanderly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon1.png",
@@ -10,14 +11,17 @@
     "splash": {
       "image": "./assets/splash-icon1.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+    "platforms": ["ios", "android", "web"]
     },
     "ios": {
+      "bundleIdentifier": "com.wanderly.app",
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon1.png",
+        "package": "com.wanderly.app",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
