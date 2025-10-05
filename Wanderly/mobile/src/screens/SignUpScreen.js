@@ -1,32 +1,61 @@
-// /src/screens/SignUpScreen.js
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import GoogleLogin from "./GoogleLogin"; // Google login button/component
+import GoogleLogin from "./GoogleLogin";
+import { signUpWithEmail } from "../services/api";
 
 export default function SignUpScreen({ navigation }) {
-  const [checking, setChecking] = React.useState(true); // State to check if JWT exists
+  const [checking, setChecking] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // Check JWT token on first load
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const jwt = await AsyncStorage.getItem("jwt"); // Get JWT from storage
+        const jwt = await AsyncStorage.getItem("jwt");
         if (jwt) {
-          // If token exists, go directly to Dashboard
           navigation.replace("Dashboard");
           return;
         }
       } catch (err) {
-        console.error("Error reading JWT:", err); // Log error if reading fails
+        console.error("Error reading JWT:", err);
       } finally {
-        setChecking(false); // Done checking
+        setChecking(false);
       }
     };
     checkLogin();
   }, []);
 
+  // Handle email sign up
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      Alert.alert("Missing Info", "Please enter both email and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Call backend API to register user
+      const data = await signUpWithEmail(email, password, name);
+
+      // Save JWT to AsyncStorage
+      await AsyncStorage.setItem("jwt", data.access_token);
+
+      // Navigate to dashboard
+      navigation.replace("Dashboard");
+    } catch (err) {
+      console.error("Sign Up Error:", err);
+      Alert.alert("Sign Up Error", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Show loader while checking JWT
   if (checking) {
-    // Show loader while checking for JWT
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#4285F4" />
@@ -37,8 +66,37 @@ export default function SignUpScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account 👋</Text>
-      <Text style={styles.subtitle}>Sign up with Google</Text>
-      <GoogleLogin navigation={navigation} /> {/* Render Google login button */}
+
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <Button title={loading ? "Creating..." : "Sign Up"} onPress={handleSignUp} disabled={loading} />
+
+      <Text style={styles.orText}>or</Text>
+
+      <GoogleLogin navigation={navigation} />
+
+      <Text style={styles.linkText} onPress={() => navigation.navigate("SignIn")}>
+        Already have an account? Sign in
+      </Text>
     </View>
   );
 }
@@ -49,15 +107,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 20,
   },
-  subtitle: {
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 6,
+  },
+  orText: {
+    marginVertical: 15,
     fontSize: 16,
     color: "#666",
-    marginBottom: 20,
+  },
+  linkText: {
+    marginTop: 20,
+    color: "#4285F4",
+    fontWeight: "600",
   },
 });

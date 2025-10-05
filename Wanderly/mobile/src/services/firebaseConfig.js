@@ -1,5 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence, GoogleAuthProvider } from "firebase/auth";
+import {
+  initializeAuth,
+  getAuth,
+  getReactNativePersistence,
+  GoogleAuthProvider,
+} from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Firebase configuration using environment variables
@@ -12,16 +17,22 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase app
+if (!firebaseConfig.apiKey) {
+  console.warn("⚠️ Missing Firebase environment variables! Check your .env file.");
+}
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication with persistence
-// const auth = getAuth(app);
+// Initialize Authentication with AsyncStorage persistence
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
 
-// Set up Google Auth provider
+// Optional: fallback in case something expects getAuth(app)
+const authInstance = getAuth(app);
+
+// Google provider
 const provider = new GoogleAuthProvider();
 
-export { auth, provider }; // Export for use in other components
+export { app, auth, authInstance, provider };

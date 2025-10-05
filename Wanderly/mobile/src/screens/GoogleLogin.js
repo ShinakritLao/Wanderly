@@ -15,6 +15,7 @@ export default function GoogleLogin({ navigation }) {
           setLoading(true);                       // Start loading indicator
           const idToken = response.params.id_token; 
           console.log("✅ Google ID Token:", id_token);
+          console.log("✅ Redirect URI:", redirectUri);
           const data = await signInWithGoogle(idToken); // Send idToken to backend to get JWT
           await AsyncStorage.setItem("jwt", data.jwt);  // Store JWT locally
           navigation.replace("Dashboard");        // Navigate to dashboard
@@ -39,7 +40,6 @@ export default function GoogleLogin({ navigation }) {
           color="#4285F4"
           disabled={!request}      // Disable button if request not ready
           onPress={() => promptAsync()} // Trigger Google login prompt
-          // onPress={() => promptAsync({ useProxy: true })}
         />
       )}
     </View>
