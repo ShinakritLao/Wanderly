@@ -129,9 +129,6 @@ async def register_user(req: RegisterRequest):
 
 @app.post("/auth/login")
 async def login_user(req: LoginRequest):
-    
-    print("Niqqa")
-
     resp = supabase.table("users").select("*").eq("email", req.email).execute()
     users = resp.data if hasattr(resp, "data") else resp.get("data")
 
