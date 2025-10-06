@@ -1,126 +1,5 @@
-// import React, { useState } from 'react';
-// import { View, Text, StyleSheet, TextInput, Button, Alert, ActivityIndicator } from 'react-native';
-// import { resetPassword } from '../services/api';
-
-// export default function ForgotPasswordScreen({ navigation }) {
-//   const [email, setEmail] = useState('');
-//   const [newPassword, setNewPassword] = useState('');
-//   const [confirmPassword, setConfirmPassword] = useState('');
-//   const [loading, setLoading] = useState(false);
-
-//   const handleResetPassword = async () => {
-//     if (!email || !newPassword || !confirmPassword) {
-//       Alert.alert('Missing Info', 'Please fill in all fields');
-//       return;
-//     }
-
-//     if (newPassword !== confirmPassword) {
-//       Alert.alert('Password Mismatch', 'New passwords do not match');
-//       return;
-//     }
-
-//     setLoading(true);
-//     try {
-//       await resetPassword(email, newPassword);
-//       Alert.alert(
-//         'Success',
-//         'Password has been reset successfully',
-//         [{ text: 'OK', onPress: () => navigation.goBack() }]
-//       );
-//     } catch (err) {
-//       console.error('Password Reset Error:', err);
-//       Alert.alert('Error', err.message || 'Failed to reset password');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Reset Password</Text>
-//       <Text style={styles.subtitle}>Enter your email and new password</Text>
-
-//       <TextInput
-//         style={styles.input}
-//         placeholder="Email"
-//         value={email}
-//         onChangeText={setEmail}
-//         autoCapitalize="none"
-//         keyboardType="email-address"
-//       />
-//       <TextInput
-//         style={styles.input}
-//         placeholder="New Password"
-//         value={newPassword}
-//         onChangeText={setNewPassword}
-//         secureTextEntry
-//       />
-//       <TextInput
-//         style={styles.input}
-//         placeholder="Confirm New Password"
-//         value={confirmPassword}
-//         onChangeText={setConfirmPassword}
-//         secureTextEntry
-//       />
-
-//       {loading ? (
-//         <ActivityIndicator size="large" color="#4285F4" />
-//       ) : (
-//         <Button title="Reset Password" onPress={handleResetPassword} />
-//       )}
-
-//       <Text style={styles.backLink} onPress={() => navigation.goBack()}>
-//         Back to Sign In
-//       </Text>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: '#fff',
-//     paddingHorizontal: 20,
-//   },
-//   title: {
-//     fontSize: 28,
-//     fontWeight: 'bold',
-//     marginBottom: 8,
-//   },
-//   subtitle: {
-//     fontSize: 16,
-//     color: '#666',
-//     marginBottom: 20,
-//   },
-//   input: {
-//     width: '100%',
-//     borderWidth: 1,
-//     borderColor: '#ccc',
-//     borderRadius: 8,
-//     padding: 10,
-//     marginVertical: 6,
-//   },
-//   backLink: {
-//     marginTop: 20,
-//     color: '#4285F4',
-//     fontWeight: '600',
-//   },
-// });
-
-
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ActivityIndicator,
-  StyleSheet,
-} from "react-native";
+import {View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator, StyleSheet,} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { resetPassword } from "../services/api";
@@ -130,28 +9,42 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
 
   const handleResetPassword = async () => {
+    setErrorMessage("");
+
     if (!email || !newPassword || !confirmPassword) {
-      Alert.alert("Missing Info", "Please fill in all fields");
+      setErrorMessage("Please fill in all fields");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid email address");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert("Password Mismatch", "New passwords do not match");
+      setErrorMessage("New passwords do not match");
       return;
     }
 
     setLoading(true);
     try {
       await resetPassword(email, newPassword);
-      Alert.alert("Success", "Password has been reset successfully", [
-        { text: "OK", onPress: () => navigation.goBack() },
-      ]);
+      alert("Password has been reset successfully");
+      navigation.goBack();
     } catch (err) {
       console.error("Password Reset Error:", err);
-      Alert.alert("Error", err.message || "Failed to reset password");
+      setErrorMessage(err.message || "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -167,7 +60,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* 🔷 Header Gradient + Logo */}
+      {/* Header Gradient + Logo */}
       <LinearGradient
         colors={["#13A1E1", "#135497", "#1B1462"]}
         style={styles.gradientHeader}
@@ -178,15 +71,13 @@ export default function ForgotPasswordScreen({ navigation }) {
         />
       </LinearGradient>
 
-      {/* 🔷 Card Form */}
+      {/* Card Form */}
       <View style={styles.formWrapper}>
         <View style={styles.formContainer}>
           <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>
             Reset Password
           </Text>
-          <Text style={styles.formSubtitle}>
-            Enter your email and new password
-          </Text>
+          <Text style={styles.formSubtitle}>Enter your email and new password</Text>
 
           <TextInput
             style={styles.input}
@@ -213,6 +104,9 @@ export default function ForgotPasswordScreen({ navigation }) {
             secureTextEntry
             placeholderTextColor="#999"
           />
+
+          {/* Show error */}
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <TouchableOpacity
             style={styles.resetButton}
@@ -285,6 +179,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 2,
   },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    fontSize: 14,
+  },
   resetButton: {
     backgroundColor: "#1a73e8",
     borderRadius: 12,
@@ -308,4 +207,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-

@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  ActivityIndicator,
-  Alert,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-} from "react-native";
+import {View, Text, TextInput, ActivityIndicator, TouchableOpacity, Image, StyleSheet} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
@@ -20,6 +11,7 @@ const SignInScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
 
   useEffect(() => {
@@ -40,19 +32,39 @@ const SignInScreen = ({ navigation }) => {
   }, []);
 
   const handleSignIn = async () => {
+    setErrorMessage("");
+
     if (!email || !password) {
-      Alert.alert("Missing Info", "Please fill in both email and password.");
+      setErrorMessage("Please fill in both email and password.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.");
       return;
     }
 
     setLoading(true);
+
     try {
       const data = await signInWithEmail(email, password);
+
+      if (!data || !data.access_token) {
+        setErrorMessage("No account found with this email or incorrect password.");
+        return;
+      }
+
       await AsyncStorage.setItem("jwt", data.access_token);
       navigation.replace("Dashboard");
     } catch (err) {
       console.error("Sign In Error:", err);
-      Alert.alert("Sign In Error", err.message || "Failed to sign in");
+      setErrorMessage("No account found with this email or incorrect password.");
     } finally {
       setLoading(false);
     }
@@ -102,6 +114,11 @@ const SignInScreen = ({ navigation }) => {
             secureTextEntry
             placeholderTextColor="#999"
           />
+
+          {/* Show error under input */}
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
 
           <TouchableOpacity
             onPress={() => navigation.navigate("ForgotPassword")}
@@ -204,6 +221,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
     elevation: 2,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    fontSize: 14,
   },
   signInButton: {
     backgroundColor: "#1a73e8",

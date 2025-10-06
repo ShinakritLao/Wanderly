@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {View, Text, TextInput, ActivityIndicator, Alert, TouchableOpacity, Image, StyleSheet} from "react-native";
+import {View, Text, TextInput, ActivityIndicator, TouchableOpacity, Image, StyleSheet} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { signUpWithEmail } from "../services/api";
 import GoogleLogin from "./GoogleLogin";
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const SignUpScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
@@ -12,6 +17,7 @@ const SignUpScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // Show error
 
   const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
 
@@ -32,24 +38,77 @@ const SignUpScreen = ({ navigation }) => {
     checkLogin();
   }, []);
 
+  const checkEmailExists = async (email) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("email")
+        .eq("email", email)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Supabase check error:", error);
+        throw error;
+      }
+
+      return !!data;
+    } catch (err) {
+      console.error("Error checking email:", err);
+      throw err;
+    }
+  };
+
   const handleSignUp = async () => {
-    if (!email || !password) {
-      Alert.alert("Missing Info", "Please enter both email and password.");
+    setErrorMessage(""); 
+
+    if (!name || !email || !password) {
+      setErrorMessage("Please fill in all fields.");
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    const nameRegex = /^[A-Za-zก-๙\s]+$/;
+    if (!nameRegex.test(name)) {
+      setErrorMessage("Name can only contain letters and spaces.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.");
+      return;
+    }
+
     if (password.length > 72) {
-      Alert.alert("Password too long", "Please use a password shorter than 72 characters.");
+      setErrorMessage("Password too long. Use fewer than 72 characters.");
       return;
     }
 
     setLoading(true);
+
     try {
+      const exists = await checkEmailExists(email);
+      if (exists) {
+        setErrorMessage("This email is already registered. Please sign in.");
+        setLoading(false);
+        return;
+      }
+
       const data = await signUpWithEmail(email, password, name);
+      if (!data || !data.access_token) {
+        setErrorMessage("Failed to sign up. Please try again.");
+        return;
+      }
+
       await AsyncStorage.setItem("jwt", data.access_token);
       navigation.replace("Dashboard");
     } catch (err) {
       console.error("Sign Up Error:", err);
-      Alert.alert("Sign Up Error", err.message);
+      setErrorMessage("Sign up failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -88,6 +147,7 @@ const SignUpScreen = ({ navigation }) => {
             onChangeText={setName}
             placeholderTextColor="#999"
           />
+
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -97,6 +157,7 @@ const SignUpScreen = ({ navigation }) => {
             keyboardType="email-address"
             placeholderTextColor="#999"
           />
+
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -105,6 +166,9 @@ const SignUpScreen = ({ navigation }) => {
             secureTextEntry
             placeholderTextColor="#999"
           />
+
+          {/* Show error under input */}
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <TouchableOpacity
             style={styles.signUpButton}
@@ -162,8 +226,6 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: "center",
     alignItems: "center",
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
   },
   logoImage: {
     width: 120,
@@ -202,6 +264,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
     elevation: 2,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    fontSize: 14,
   },
   signUpButton: {
     backgroundColor: "#1a73e8",
