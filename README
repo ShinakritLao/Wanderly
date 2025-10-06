@@ -1,0 +1,2 @@
+Do not push ".env".
+This file is a secret. Use it only on the environment.
