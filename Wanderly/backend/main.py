@@ -60,6 +60,10 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class ResetPasswordRequest(BaseModel):
+    email: str
+    newPassword: str
+
 # --- JWT Helper ---
 def create_access_token(subject: str, expires_delta: Optional[timedelta] = None):
     to_encode = {"sub": subject}
@@ -168,3 +172,38 @@ async def dashboard(uid: str = Depends(verify_jwt)):
     if not data:
         raise HTTPException(status_code=404, detail="User not found")
     return {"user": data[0]}
+
+@app.post("/auth/reset-password")
+async def reset_password(req: ResetPasswordRequest):
+    try:
+        # Check if user exists
+        resp = supabase.table("users").select("*").eq("email", req.email).execute()
+        users = resp.data if hasattr(resp, "data") else resp.get("data")
+
+        if not users:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user = users[0]
+        
+        # Check if it's a Google account
+        if not user.get("password"):
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot reset password for Google accounts"
+            )
+
+        # Hash new password
+        hashed_pw = hash_password(req.newPassword)
+        
+        # Update password in database
+        supabase.table("users").update({
+            "password": hashed_pw
+        }).eq("email", req.email).execute()
+
+        return {"message": "Password reset successful"}
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to reset password: {str(e)}"
+        )

@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import {View, Text, TextInput, ActivityIndicator, Alert, TouchableOpacity, Image, StyleSheet} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import GoogleLogin from "./GoogleLogin";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { signUpWithEmail } from "../services/api";
+import GoogleLogin from "./GoogleLogin";
 
-export default function SignUpScreen({ navigation }) {
+const SignUpScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Check JWT token on first load
+  const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
+
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -29,26 +32,20 @@ export default function SignUpScreen({ navigation }) {
     checkLogin();
   }, []);
 
-  // Handle email sign up
   const handleSignUp = async () => {
     if (!email || !password) {
       Alert.alert("Missing Info", "Please enter both email and password.");
       return;
     }
     if (password.length > 72) {
-    Alert.alert("Password too long", "Please use a password shorter than 72 characters.");
+      Alert.alert("Password too long", "Please use a password shorter than 72 characters.");
       return;
-}
+    }
 
     setLoading(true);
     try {
-      // Call backend API to register user
       const data = await signUpWithEmail(email, password, name);
-
-      // Save JWT to AsyncStorage
       await AsyncStorage.setItem("jwt", data.access_token);
-
-      // Navigate to dashboard
       navigation.replace("Dashboard");
     } catch (err) {
       console.error("Sign Up Error:", err);
@@ -58,8 +55,7 @@ export default function SignUpScreen({ navigation }) {
     }
   };
 
-  // Show loader while checking JWT
-  if (checking) {
+  if (checking || !fontsLoaded) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#4285F4" />
@@ -69,71 +65,206 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create Account 👋</Text>
+      <LinearGradient
+        colors={["#13A1E1", "#135497", "#1B1462"]}
+        style={styles.gradientHeader}
+      >
+        <Image
+          source={require("../assets/wanderly-logo-white.png")}
+          style={styles.logoImage}
+        />
+      </LinearGradient>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={styles.formWrapper}>
+        <View style={styles.formContainer}>
+          <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>
+            Get Started
+          </Text>
 
-      <Button title={loading ? "Creating..." : "Sign Up"} onPress={handleSignUp} disabled={loading} />
+          <TextInput
+            style={styles.input}
+            placeholder="Full Name"
+            value={name}
+            onChangeText={setName}
+            placeholderTextColor="#999"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholderTextColor="#999"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
 
-      <Text style={styles.orText}>or</Text>
+          <TouchableOpacity
+            style={styles.signUpButton}
+            onPress={handleSignUp}
+            disabled={loading}
+          >
+            <Text style={styles.signUpButtonText}>
+              {loading ? "Creating..." : "Sign up"}
+            </Text>
+          </TouchableOpacity>
 
-      <GoogleLogin navigation={navigation} />
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.orText}>or</Text>
+            <View style={styles.divider} />
+          </View>
 
-      <Text style={styles.linkText} onPress={() => navigation.navigate("SignIn")}>
-        Already have an account? Sign in
-      </Text>
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={() => {
+              if (googleLoginRef?.current) {
+                googleLoginRef.current();
+              }
+            }}
+          >
+            <Image
+              source={require("../assets/google-logo.png")}
+              style={styles.googleLogo}
+            />
+            <Text style={styles.googleButtonText}>Sign in with Google</Text>
+          </TouchableOpacity>
+
+          <GoogleLogin
+            navigation={navigation}
+            refCallback={(callbackFn) => (googleLoginRef.current = callbackFn)}
+          />
+
+          <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+            <Text style={styles.linkText}>
+              Already have an account?{" "}
+              <Text style={styles.signInText}>Sign in</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
-}
+};
+
+const googleLoginRef = { current: null };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: "#fff" },
+  gradientHeader: {
+    height: 200,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
+  logoImage: {
+    width: 120,
+    height: 120,
+    marginTop: 60,
     marginBottom: 20,
   },
+  formWrapper: {
+    flex: 1,
+    marginTop: -30,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+  formContainer: {
+    padding: 20,
+    marginTop: 20,
+  },
+  formTitle: {
+    fontSize: 30,
+    color: "#135497",
+    textAlign: "center",
+    marginBottom: 25,
+    letterSpacing: 0.5,
+  },
   input: {
-    width: "100%",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 16,
+    fontSize: 16,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginVertical: 6,
+    borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
+  },
+  signUpButton: {
+    backgroundColor: "#1a73e8",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  signUpButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 30,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ddd",
   },
   orText: {
-    marginVertical: 15,
-    fontSize: 16,
     color: "#666",
+    paddingHorizontal: 10,
+    fontSize: 14,
+  },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  googleLogo: {
+    width: 22,
+    height: 22,
+    marginRight: 10,
+  },
+  googleButtonText: {
+    fontSize: 15,
+    color: "#444",
+    fontWeight: "500",
   },
   linkText: {
+    textAlign: "center",
     marginTop: 20,
-    color: "#4285F4",
+    fontSize: 14,
+    color: "#666",
+  },
+  signInText: {
+    color: "#1a73e8",
     fontWeight: "600",
   },
 });
+
+export default SignUpScreen;

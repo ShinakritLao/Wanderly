@@ -1,4 +1,4 @@
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.122:8000"; 
+const API_URL = process.env.EXPO_PUBLIC_API_URL; 
 
 // Check response error and convert to JSON.
 async function handleResponse(res) {
@@ -61,8 +61,8 @@ export async function fetchDashboard(jwt) {
 }
 
 /**
-* Logout user (optional)
-* Backend: /auth/logout (ถ้ามี)
+* Logout user
+* Backend: /auth/logout
 */
 export async function logout(jwt) {
   const res = await fetch(`${API_URL}/auth/logout`, {
@@ -71,3 +71,31 @@ export async function logout(jwt) {
   });
   return handleResponse(res);
 }
+
+/**
+* Reset password
+* Backend: /auth/reset-password
+*/
+export const resetPassword = async (email, newPassword) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        newPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to reset password');
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};

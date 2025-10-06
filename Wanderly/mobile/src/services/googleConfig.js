@@ -12,7 +12,7 @@ export function useGoogleAuth() {
   // const redirectUri = 'https://auth.expo.io/@YOUR_EXPO_USERNAME/wanderly';
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     redirectUri, 
@@ -31,7 +31,7 @@ export function useGoogleAuth() {
     }
   }, [response]);
 
-  // console.log("✅ Redirect URI:", redirectUri);
+  console.log("✅ Redirect URI:", redirectUri);
   // console.log("✅ Web Client ID:", process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID);
 
   return { request, promptAsync, response };

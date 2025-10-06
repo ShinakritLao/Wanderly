@@ -1,45 +1,47 @@
-import React, { useEffect } from "react";
-import { View, Button, ActivityIndicator, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useGoogleAuth } from "../services/googleConfig"; // Custom hook for Google OAuth
-import { signInWithGoogle } from "../services/api";        // Backend API to exchange idToken for JWT
+import { useGoogleAuth } from "../services/googleConfig";
+import { signInWithGoogle } from "../services/api";
 
-export default function GoogleLogin({ navigation }) {
-  const { request, promptAsync, response } = useGoogleAuth(); // Google OAuth request/response
-  const [loading, setLoading] = React.useState(false);       // Loading state during login
+export default function GoogleLogin({ navigation, refCallback }) {
+  const { request, promptAsync, response } = useGoogleAuth();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (refCallback) refCallback(() => promptAsync());
+  }, [refCallback, promptAsync]);
 
   useEffect(() => {
     const handleLogin = async () => {
       if (response?.type === "success") {
         try {
-          setLoading(true);                       // Start loading indicator
-          const idToken = response.params.id_token; 
-          console.log("✅ Google ID Token:", id_token);
-          console.log("✅ Redirect URI:", redirectUri);
-          const data = await signInWithGoogle(idToken); // Send idToken to backend to get JWT
-          await AsyncStorage.setItem("jwt", data.jwt);  // Store JWT locally
-          navigation.replace("Dashboard");        // Navigate to dashboard
+          setLoading(true);
+          const idToken = response.params.id_token;
+          console.log("✅ Google ID Token:", idToken);
+          const data = await signInWithGoogle(idToken);
+          await AsyncStorage.setItem("jwt", data.jwt);
+          navigation.replace("Dashboard");
         } catch (err) {
-          console.error(err);
-          Alert.alert("Login failed", "Could not log in with Google."); // Show error alert
+          console.error("❌ Google login error:", err);
+          Alert.alert("Login failed", "Could not log in with Google.");
         } finally {
-          setLoading(false);                      // Stop loading indicator
+          setLoading(false);
         }
       }
     };
-    handleLogin(); // Run login handler whenever response changes
+    handleLogin();
   }, [response]);
 
   return (
-    <View style={{ marginVertical: 10 }}>
+    <View style={{ marginVertical: 0 }}>
       {loading ? (
-        <ActivityIndicator size="large" color="#4285F4" /> // Show spinner while logging in
+        <ActivityIndicator size="large" color="#4285F4" />
       ) : (
-        <Button
-          title="Sign in with Google"
-          color="#4285F4"
-          disabled={!request}      // Disable button if request not ready
-          onPress={() => promptAsync()} // Trigger Google login prompt
+        <TouchableOpacity
+          disabled={!request || loading}
+          onPress={() => promptAsync()}
+          style={{ width: 1, height: 1, opacity: 0 }}
         />
       )}
     </View>

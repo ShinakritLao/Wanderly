@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Wanderly",
+    "name": "wanderly",
     "slug": "wanderly",
     "scheme": "wanderly",
     "version": "1.0.0",
@@ -11,20 +11,32 @@
     "splash": {
       "image": "./assets/splash-icon1.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-    "platforms": ["ios", "android", "web"]
+      "backgroundColor": "#ffffff"
     },
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "bundleIdentifier": "com.wanderly.app",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.wanderly.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon1.png",
-        "package": "com.wanderly.app",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "wanderly",
+              "host": "*"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon1.png"

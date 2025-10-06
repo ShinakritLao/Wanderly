@@ -72,7 +72,7 @@ export default function DashboardScreen({ navigation }) {
       )}
 
       <View style={{ marginTop: 20 }}>
-        <Button title="Refresh" onPress={load} /> {/* Refresh button */}
+        <Button title="Refresh" onPress={load} />
       </View>
 
       <View style={{ marginTop: 10 }}>
