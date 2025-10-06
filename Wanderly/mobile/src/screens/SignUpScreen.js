@@ -35,6 +35,10 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert("Missing Info", "Please enter both email and password.");
       return;
     }
+    if (password.length > 72) {
+    Alert.alert("Password too long", "Please use a password shorter than 72 characters.");
+      return;
+}
 
     setLoading(true);
     try {

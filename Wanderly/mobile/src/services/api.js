@@ -27,7 +27,7 @@ export async function signInWithGoogle(idToken) {
 * Backend: /auth/signup
 */
 export async function signUpWithEmail(email, password, name) {
-  const res = await fetch(`${API_URL}/auth/signup`, {
+  const res = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, name }),

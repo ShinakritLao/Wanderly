@@ -69,10 +69,12 @@ def create_access_token(subject: str, expires_delta: Optional[timedelta] = None)
 
 # --- Password Helpers ---
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    safe_password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
+    return pwd_context.hash(safe_password)
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
+    return pwd_context.verify(safe_password, hashed_password)
 
 # ===================================================== #
 #                   GOOGLE LOGIN                        #
@@ -133,7 +135,7 @@ async def login_user(req: LoginRequest):
     users = resp.data if hasattr(resp, "data") else resp.get("data")
 
     if not users:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=204, detail="User not found")
 
     user = users[0]
     if not user.get("password"):

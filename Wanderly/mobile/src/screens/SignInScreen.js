@@ -39,6 +39,7 @@ export default function SignInScreen({ navigation }) {
     try {
       // Call backend login
       const data = await signInWithEmail(email, password);
+      console.log("Sign In Success:", data);
 
       // Store JWT
       await AsyncStorage.setItem("jwt", data.access_token);
