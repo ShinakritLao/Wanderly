@@ -49,7 +49,7 @@ app.add_middleware(
 
 # --- Pydantic Schemas ---
 class TokenRequest(BaseModel):
-    token: str  # Firebase ID token from frontend
+    id_token: str  # Firebase ID token from frontend
 
 class RegisterRequest(BaseModel):
     email: str
@@ -86,7 +86,7 @@ def verify_password(plain_password, hashed_password):
 @app.post("/auth/google")
 async def auth_google(payload: TokenRequest):
     try:
-        decoded = firebase_auth.verify_id_token(payload.token)
+        decoded = firebase_auth.verify_id_token(payload.id_token)
         uid = decoded.get("uid")
         email = decoded.get("email")
         name = decoded.get("name")

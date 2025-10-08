@@ -17,7 +17,6 @@ export default function App() {
       <Stack.Navigator 
         screenOptions={{ 
           headerShown: false,
-          // เพิ่ม animation config สำหรับเฟดเอฟเฟค
           transitionSpec: {
             open: {
               animation: 'timing',

@@ -1934,19 +1934,19 @@
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/elements@^2.6.4":
-  version "2.6.4"
-  resolved "https://registry.npmjs.org/@react-navigation/elements/-/elements-2.6.4.tgz"
-  integrity sha512-O3X9vWXOEhAO56zkQS7KaDzL8BvjlwZ0LGSteKpt1/k6w6HONG+2Wkblrb057iKmehTkEkQMzMLkXiuLmN5x9Q==
+"@react-navigation/elements@^2.6.5":
+  version "2.6.5"
+  resolved "https://registry.npmjs.org/@react-navigation/elements/-/elements-2.6.5.tgz"
+  integrity sha512-HOaekvFeoqKyaSKP2hakL7OUnw0jIhk/1wMjcovUKblT76LMTumZpriqsc30m/Vnyy1a8zgp4VsuA1xftcalgQ==
   dependencies:
     color "^4.2.3"
     use-latest-callback "^0.2.4"
     use-sync-external-store "^1.5.0"
 
-"@react-navigation/native@^7.1.17":
-  version "7.1.17"
-  resolved "https://registry.npmjs.org/@react-navigation/native/-/native-7.1.17.tgz"
-  integrity sha512-uEcYWi1NV+2Qe1oELfp9b5hTYekqWATv2cuwcOAg5EvsIsUPtzFrKIasgUXLBRGb9P7yR5ifoJ+ug4u6jdqSTQ==
+"@react-navigation/native@^7.1.18":
+  version "7.1.18"
+  resolved "https://registry.npmjs.org/@react-navigation/native/-/native-7.1.18.tgz"
+  integrity sha512-DZgd6860dxcq3YX7UzIXeBr6m3UgXvo9acxp5jiJyIZXdR00Br9JwVkO7e0bUeTA2d3Z8dsmtAR84Y86NnH64Q==
   dependencies:
     "@react-navigation/core" "^7.12.4"
     escape-string-regexp "^4.0.0"
@@ -1961,12 +1961,12 @@
   dependencies:
     nanoid "^3.3.11"
 
-"@react-navigation/stack@^7.4.8":
-  version "7.4.8"
-  resolved "https://registry.npmjs.org/@react-navigation/stack/-/stack-7.4.8.tgz"
-  integrity sha512-zZsX52Nw1gsq33Hx4aNgGV2RmDJgVJM71udomCi3OdlntqXDguav3J2t5oe/Acf/9uU8JiJE9W8JGtoRZ6nXIg==
+"@react-navigation/stack@^7.4.9":
+  version "7.4.9"
+  resolved "https://registry.npmjs.org/@react-navigation/stack/-/stack-7.4.9.tgz"
+  integrity sha512-uQBiHt52yIyZm59dofCoLrvGvfPSfnzAmCstT+skRw4bBporka2ZZYzFJZakjsUeb6cK/5QcQPSM3poHkGp2nA==
   dependencies:
-    "@react-navigation/elements" "^2.6.4"
+    "@react-navigation/elements" "^2.6.5"
     color "^4.2.3"
 
 "@sinclair/typebox@^0.27.8":
@@ -1988,62 +1988,62 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
-"@supabase/auth-js@2.72.0":
-  version "2.72.0"
-  resolved "https://registry.npmjs.org/@supabase/auth-js/-/auth-js-2.72.0.tgz"
-  integrity sha512-4+bnUrtTDK1YD0/FCx2YtMiQH5FGu9Jlf4IQi5kcqRwRwqp2ey39V61nHNdH86jm3DIzz0aZKiWfTW8qXk1swQ==
+"@supabase/auth-js@2.74.0":
+  version "2.74.0"
+  resolved "https://registry.npmjs.org/@supabase/auth-js/-/auth-js-2.74.0.tgz"
+  integrity sha512-EJYDxYhBCOS40VJvfQ5zSjo8Ku7JbTICLTcmXt4xHMQZt4IumpRfHg11exXI9uZ6G7fhsQlNgbzDhFN4Ni9NnA==
   dependencies:
-    "@supabase/node-fetch" "^2.6.14"
+    "@supabase/node-fetch" "2.6.15"
 
-"@supabase/functions-js@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.npmjs.org/@supabase/functions-js/-/functions-js-2.5.0.tgz"
-  integrity sha512-SXBx6Jvp+MOBekeKFu+G11YLYPeVeGQl23eYyAG9+Ro0pQ1aIP0UZNIBxHKNHqxzR0L0n6gysNr2KT3841NATw==
+"@supabase/functions-js@2.74.0":
+  version "2.74.0"
+  resolved "https://registry.npmjs.org/@supabase/functions-js/-/functions-js-2.74.0.tgz"
+  integrity sha512-VqWYa981t7xtIFVf7LRb9meklHckbH/tqwaML5P3LgvlaZHpoSPjMCNLcquuLYiJLxnh2rio7IxLh+VlvRvSWw==
   dependencies:
-    "@supabase/node-fetch" "^2.6.14"
+    "@supabase/node-fetch" "2.6.15"
 
-"@supabase/node-fetch@^2.6.13", "@supabase/node-fetch@^2.6.14", "@supabase/node-fetch@2.6.15":
+"@supabase/node-fetch@2.6.15":
   version "2.6.15"
   resolved "https://registry.npmjs.org/@supabase/node-fetch/-/node-fetch-2.6.15.tgz"
   integrity sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==
   dependencies:
     whatwg-url "^5.0.0"
 
-"@supabase/postgrest-js@1.21.4":
-  version "1.21.4"
-  resolved "https://registry.npmjs.org/@supabase/postgrest-js/-/postgrest-js-1.21.4.tgz"
-  integrity sha512-TxZCIjxk6/dP9abAi89VQbWWMBbybpGWyvmIzTd79OeravM13OjR/YEYeyUOPcM1C3QyvXkvPZhUfItvmhY1IQ==
+"@supabase/postgrest-js@2.74.0":
+  version "2.74.0"
+  resolved "https://registry.npmjs.org/@supabase/postgrest-js/-/postgrest-js-2.74.0.tgz"
+  integrity sha512-9Ypa2eS0Ib/YQClE+BhDSjx7OKjYEF6LAGjTB8X4HucdboGEwR0LZKctNfw6V0PPIAVjjzZxIlNBXGv0ypIkHw==
   dependencies:
-    "@supabase/node-fetch" "^2.6.14"
+    "@supabase/node-fetch" "2.6.15"
 
-"@supabase/realtime-js@2.15.5":
-  version "2.15.5"
-  resolved "https://registry.npmjs.org/@supabase/realtime-js/-/realtime-js-2.15.5.tgz"
-  integrity sha512-/Rs5Vqu9jejRD8ZeuaWXebdkH+J7V6VySbCZ/zQM93Ta5y3mAmocjioa/nzlB6qvFmyylUgKVS1KpE212t30OA==
+"@supabase/realtime-js@2.74.0":
+  version "2.74.0"
+  resolved "https://registry.npmjs.org/@supabase/realtime-js/-/realtime-js-2.74.0.tgz"
+  integrity sha512-K5VqpA4/7RO1u1nyD5ICFKzWKu58bIDcPxHY0aFA7MyWkFd0pzi/XYXeoSsAifnD9p72gPIpgxVXCQZKJg1ktQ==
   dependencies:
-    "@supabase/node-fetch" "^2.6.13"
+    "@supabase/node-fetch" "2.6.15"
     "@types/phoenix" "^1.6.6"
     "@types/ws" "^8.18.1"
     ws "^8.18.2"
 
-"@supabase/storage-js@2.12.2":
-  version "2.12.2"
-  resolved "https://registry.npmjs.org/@supabase/storage-js/-/storage-js-2.12.2.tgz"
-  integrity sha512-SiySHxi3q7gia7NBYpsYRu8gyI0NhFwSORMxbZIxJ/zAVkN6QpwDRan158CJ+UdzD4WB/rQMAGRqIJQP+7ccAQ==
+"@supabase/storage-js@2.74.0":
+  version "2.74.0"
+  resolved "https://registry.npmjs.org/@supabase/storage-js/-/storage-js-2.74.0.tgz"
+  integrity sha512-o0cTQdMqHh4ERDLtjUp1/KGPbQoNwKRxUh6f8+KQyjC5DSmiw/r+jgFe/WHh067aW+WU8nA9Ytw9ag7OhzxEkQ==
   dependencies:
-    "@supabase/node-fetch" "^2.6.14"
-
-"@supabase/supabase-js@^2.58.0":
-  version "2.58.0"
-  resolved "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.58.0.tgz"
-  integrity sha512-Tm1RmQpoAKdQr4/8wiayGti/no+If7RtveVZjHR8zbO7hhQjmPW2Ok5ZBPf1MGkt5c+9R85AVMsTfSaqAP1sUg==
-  dependencies:
-    "@supabase/auth-js" "2.72.0"
-    "@supabase/functions-js" "2.5.0"
     "@supabase/node-fetch" "2.6.15"
-    "@supabase/postgrest-js" "1.21.4"
-    "@supabase/realtime-js" "2.15.5"
-    "@supabase/storage-js" "2.12.2"
+
+"@supabase/supabase-js@^2.74.0":
+  version "2.74.0"
+  resolved "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.74.0.tgz"
+  integrity sha512-IEMM/V6gKdP+N/X31KDIczVzghDpiPWFGLNjS8Rus71KvV6y6ueLrrE/JGCHDrU+9pq5copF3iCa0YQh+9Lq9Q==
+  dependencies:
+    "@supabase/auth-js" "2.74.0"
+    "@supabase/functions-js" "2.74.0"
+    "@supabase/node-fetch" "2.6.15"
+    "@supabase/postgrest-js" "2.74.0"
+    "@supabase/realtime-js" "2.74.0"
+    "@supabase/storage-js" "2.74.0"
 
 "@types/babel__core@^7.1.14":
   version "7.20.5"
