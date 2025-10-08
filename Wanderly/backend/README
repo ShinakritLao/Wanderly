@@ -1,0 +1,2 @@
+Do not push "serviceAccountKey.json".
+This file is a secret. Use it only on the backend.
