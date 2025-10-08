@@ -2,16 +2,16 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import * as AuthSession from "expo-auth-session";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 
-// Handle OAuth redirect if needed
 WebBrowser.maybeCompleteAuthSession();
 
 export function useGoogleAuth() {
+  // Set redirectUri according to platform
   const redirectUri = AuthSession.makeRedirectUri({
-    useProxy: true,
+    useProxy: Platform.OS !== "web", // Mobile proxy, not web-based
   });
 
-  // Google OAuth request
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
@@ -21,18 +21,15 @@ export function useGoogleAuth() {
   });
 
   useEffect(() => {
+    console.log("🔹 Google OAuth response:", response);
+
     if (response?.type === "success") {
-      // Pull id_token from response
       const id_token = response.authentication?.idToken || response.params?.id_token;
-      if (id_token) {
-        console.log("✅ Got Google ID token:", id_token);
-      } else {
-        console.warn("⚠️ Google response success but no id_token found:", response);
-      }
+      console.log("✅ Got Google ID token:", id_token);
+    } else if (response?.type === "error") {
+      console.error("❌ Google OAuth error:", response);
     }
   }, [response]);
 
-  console.log("✅ Redirect URI (used by Google OAuth):", redirectUri);
-
-  return { request, promptAsync, response };
+  return { request, promptAsync, response, redirectUri };
 }

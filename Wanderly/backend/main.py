@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -41,7 +42,7 @@ security = HTTPBearer()
 # --- Configure CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change when deploy (frontend domain)
+    allow_origins=["*"],  # เปลี่ยนเป็น domain frontend จริงตอน deploy
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,7 +50,7 @@ app.add_middleware(
 
 # --- Pydantic Schemas ---
 class TokenRequest(BaseModel):
-    id_token: str  # Firebase ID token from frontend
+    id_token: str
 
 class RegisterRequest(BaseModel):
     email: str
@@ -64,14 +65,20 @@ class ResetPasswordRequest(BaseModel):
     email: str
     newPassword: str
 
-# --- JWT Helper ---
-def create_access_token(subject: str, expires_delta: Optional[timedelta] = None):
-    to_encode = {"sub": subject}
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+# --- Helper Functions ---
+def get_supabase_data(resp):
+    if hasattr(resp, "data") and resp.data is not None:
+        return resp.data
+    elif isinstance(resp, dict) and "data" in resp:
+        return resp["data"]
+    return []
 
-# --- Password Helpers ---
+def create_access_token(subject: str, expires_delta: Optional[timedelta] = None):
+    now = datetime.utcnow()
+    expire = now + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    payload = {"sub": subject, "iat": now, "exp": expire}
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
 def hash_password(password: str):
     safe_password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.hash(safe_password)
@@ -92,20 +99,21 @@ async def auth_google(payload: TokenRequest):
         name = decoded.get("name")
         picture = decoded.get("picture")
 
-        # Check if exists in Supabase
         resp = supabase.table("users").select("*").eq("uid", uid).execute()
-        users = resp.data if hasattr(resp, "data") else resp.get("data")
+        users = get_supabase_data(resp)
 
         if not users:
             supabase.table("users").insert({
                 "uid": uid,
                 "email": email,
                 "name": name,
-                "picture": picture
+                "picture": picture,
+                "login_type": "google"
             }).execute()
 
         token = create_access_token(subject=uid)
         return {"access_token": token, "login_type": "google"}
+
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Invalid Google token: {str(e)}")
 
@@ -114,9 +122,12 @@ async def auth_google(payload: TokenRequest):
 # ===================================================== #
 @app.post("/auth/register")
 async def register_user(req: RegisterRequest):
-    # Check if user already exists
-    existing = supabase.table("users").select("*").eq("email", req.email).execute()
-    if existing.data:
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+
+    resp = supabase.table("users").select("*").eq("email", req.email).execute()
+    existing = get_supabase_data(resp)
+    if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_pw = hash_password(req.password)
@@ -124,25 +135,24 @@ async def register_user(req: RegisterRequest):
         "email": req.email,
         "password": hashed_pw,
         "name": req.name or req.email.split("@")[0],
-        "uid": f"local_{req.email}",
+        "uid": f"local_{uuid.uuid4().hex}",
         "picture": None,
+        "login_type": "local"
     }
 
     supabase.table("users").insert(user).execute()
-
     token = create_access_token(subject=user["uid"])
     return {"access_token": token, "user": user}
 
 @app.post("/auth/login")
 async def login_user(req: LoginRequest):
     resp = supabase.table("users").select("*").eq("email", req.email).execute()
-    users = resp.data if hasattr(resp, "data") else resp.get("data")
-
+    users = get_supabase_data(resp)
     if not users:
-        raise HTTPException(status_code=204, detail="User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
     user = users[0]
-    if not user.get("password"):
+    if user.get("login_type") != "local":
         raise HTTPException(status_code=400, detail="This account uses Google sign-in")
 
     if not verify_password(req.password, user["password"]):
@@ -168,42 +178,28 @@ def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)):
 @app.get("/dashboard")
 async def dashboard(uid: str = Depends(verify_jwt)):
     resp = supabase.table("users").select("*").eq("uid", uid).execute()
-    data = resp.data if hasattr(resp, "data") else resp.get("data")
+    data = get_supabase_data(resp)
     if not data:
         raise HTTPException(status_code=404, detail="User not found")
     return {"user": data[0]}
 
+# ===================================================== #
+#                 RESET PASSWORD                        #
+# ===================================================== #
 @app.post("/auth/reset-password")
 async def reset_password(req: ResetPasswordRequest):
-    try:
-        # Check if user exists
-        resp = supabase.table("users").select("*").eq("email", req.email).execute()
-        users = resp.data if hasattr(resp, "data") else resp.get("data")
+    if len(req.newPassword) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
-        if not users:
-            raise HTTPException(status_code=404, detail="User not found")
+    resp = supabase.table("users").select("*").eq("email", req.email).execute()
+    users = get_supabase_data(resp)
+    if not users:
+        raise HTTPException(status_code=404, detail="User not found")
 
-        user = users[0]
-        
-        # Check if it's a Google account
-        if not user.get("password"):
-            raise HTTPException(
-                status_code=400, 
-                detail="Cannot reset password for Google accounts"
-            )
+    user = users[0]
+    if user.get("login_type") != "local":
+        raise HTTPException(status_code=400, detail="Cannot reset password for Google accounts")
 
-        # Hash new password
-        hashed_pw = hash_password(req.newPassword)
-        
-        # Update password in database
-        supabase.table("users").update({
-            "password": hashed_pw
-        }).eq("email", req.email).execute()
-
-        return {"message": "Password reset successful"}
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to reset password: {str(e)}"
-        )
+    hashed_pw = hash_password(req.newPassword)
+    supabase.table("users").update({"password": hashed_pw}).eq("email", req.email).execute()
+    return {"message": "Password reset successful"}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import { View, ActivityIndicator, Alert, TouchableOpacity, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGoogleAuth } from "../services/googleConfig";
 import { signInWithGoogle } from "../services/api";
@@ -7,12 +7,19 @@ import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 
 export default function GoogleLogin({ navigation, refCallback }) {
-  const { request, promptAsync, response } = useGoogleAuth();
+  const { request, promptAsync, response, redirectUri } = useGoogleAuth();
   const [loading, setLoading] = useState(false);
 
+  // Allow the parent component to call promptAsync.
   useEffect(() => {
     if (refCallback) refCallback(() => promptAsync());
   }, [refCallback, promptAsync]);
+
+  // Log redirectUri
+  useEffect(() => {
+    // console.log("🌐 Platform:", Platform.OS);
+    // console.log("🔹 Google OAuth redirectUri being used:", redirectUri);
+  }, [redirectUri]);
 
   useEffect(() => {
     const handleLogin = async () => {
@@ -20,25 +27,29 @@ export default function GoogleLogin({ navigation, refCallback }) {
         try {
           setLoading(true);
 
-          // Extract Google ID Token from response
-          const idToken =
-            response?.authentication?.idToken || response?.params?.id_token;
-
-          if (!idToken) throw new Error("No ID token found from Google");
-
-          // Convert this token to Firebase for verification.
-          const credential = GoogleAuthProvider.credential(idToken);
+          let credential;
+          if (Platform.OS === "web") {
+            // On the web, use accessToken instead of idToken.
+            const accessToken = response.authentication?.accessToken;
+            console.log("🔹 Web accessToken:", accessToken);
+            if (!accessToken) throw new Error("No access token found from Google (web)");
+            credential = GoogleAuthProvider.credential(null, accessToken);
+          } else {
+            // On mobile, use idToken.
+            const idToken = response.authentication?.idToken;
+            console.log("🔹 Mobile idToken:", idToken);
+            if (!idToken) throw new Error("No ID token found from Google (mobile)");
+            credential = GoogleAuthProvider.credential(idToken);
+          }
 
           // Login to Firebase
           const firebaseUser = await signInWithCredential(auth, credential);
-
-          // Request a real Firebase ID Token
           const firebaseToken = await firebaseUser.user.getIdToken();
 
-          // Send this token to the backend to verify and issue a JWT.
-          const data = await signInWithGoogle(firebaseToken);
+          console.log("✅ Firebase ID token:", firebaseToken);
 
-          // Store backend JWT
+          // Send token to backend to receive JWT
+          const data = await signInWithGoogle(firebaseToken);
           await AsyncStorage.setItem("jwt", data.access_token);
 
           navigation.replace("Dashboard");
