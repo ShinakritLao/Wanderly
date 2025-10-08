@@ -6,3 +6,4 @@ python-jose[cryptography]
 supabase
 python-multipart
 passlib[bcrypt]
+pydantic[email]

@@ -1,6 +1,4 @@
-import Constants from 'expo-constants';
-
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://192.168.1.122:8000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 async function handleResponse(res) {
   const text = await res.text();
@@ -14,6 +12,7 @@ async function handleResponse(res) {
   }
 }
 
+// --- Auth existing functions ---
 export async function signInWithGoogle(idToken) {
   const res = await fetch(`${API_URL}/auth/google`, {
     method: "POST",
@@ -57,11 +56,21 @@ export async function logout(jwt) {
   return handleResponse(res);
 }
 
-export const resetPassword = async (email, newPassword) => {
-  const res = await fetch(`${API_URL}/auth/reset-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, newPassword }),
+// --- Forgot Password Flow ---
+export async function requestOtp(email) {
+  const res = await fetch(`${API_URL}/auth/request-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
   });
   return handleResponse(res);
-};
+}
+
+export async function verifyOtpAndResetPassword(email, otp, newPassword) {
+  const res = await fetch(`${API_URL}/auth/verify-otp-reset`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp, newPassword }),
+  });
+  return handleResponse(res);
+}

@@ -1,13 +1,14 @@
 import os
 import uuid
+import random
 from datetime import datetime, timedelta
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 
 import firebase_admin
@@ -48,21 +49,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- OTP storage (in-memory for demo) ---
+otp_store = {}  # { email: { otp: "123456", expires: datetime } }
+
 # --- Pydantic Schemas ---
 class TokenRequest(BaseModel):
     id_token: str
 
 class RegisterRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     name: Optional[str] = None
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class ResetPasswordRequest(BaseModel):
-    email: str
+    email: EmailStr
+    newPassword: str
+
+class RequestOtpBody(BaseModel):
+    email: EmailStr
+
+class VerifyOtpBody(BaseModel):
+    email: EmailStr
+    otp: str
     newPassword: str
 
 # --- Helper Functions ---
@@ -86,6 +98,10 @@ def hash_password(password: str):
 def verify_password(plain_password, hashed_password):
     safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(safe_password, hashed_password)
+
+# Fake email sender for demo
+def send_email(email: str, otp: str):
+    print(f"[Email sent to {email}]: OTP = {otp}")  # ใช้จริงต้อง integrate กับ SMTP / SendGrid
 
 # ===================================================== #
 #                   GOOGLE LOGIN                        #
@@ -184,22 +200,46 @@ async def dashboard(uid: str = Depends(verify_jwt)):
     return {"user": data[0]}
 
 # ===================================================== #
-#                 RESET PASSWORD                        #
+#                 RESET PASSWORD / OTP                 #
 # ===================================================== #
-@app.post("/auth/reset-password")
-async def reset_password(req: ResetPasswordRequest):
-    if len(req.newPassword) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
-
-    resp = supabase.table("users").select("*").eq("email", req.email).execute()
+@app.post("/auth/request-otp")
+async def request_otp(req: RequestOtpBody, background_tasks: BackgroundTasks):
+    email = req.email
+    resp = supabase.table("users").select("*").eq("email", email).execute()
     users = get_supabase_data(resp)
     if not users:
         raise HTTPException(status_code=404, detail="User not found")
 
+    otp_code = f"{random.randint(100000, 999999)}"
+    otp_store[email] = {"otp": otp_code, "expires": datetime.utcnow() + timedelta(minutes=10)}
+    background_tasks.add_task(send_email, email, otp_code)
+    return {"message": "OTP sent"}
+
+@app.post("/auth/verify-otp-reset")
+async def verify_otp_reset(req: VerifyOtpBody):
+    email = req.email
+    otp = req.otp
+    new_password = req.newPassword
+
+    if email not in otp_store:
+        raise HTTPException(status_code=400, detail="No OTP requested for this email")
+
+    otp_data = otp_store[email]
+    if otp_data["otp"] != otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    if datetime.utcnow() > otp_data["expires"]:
+        del otp_store[email]
+        raise HTTPException(status_code=400, detail="OTP expired")
+
+    # update password
+    resp = supabase.table("users").select("*").eq("email", email).execute()
+    users = get_supabase_data(resp)
     user = users[0]
     if user.get("login_type") != "local":
         raise HTTPException(status_code=400, detail="Cannot reset password for Google accounts")
 
-    hashed_pw = hash_password(req.newPassword)
-    supabase.table("users").update({"password": hashed_pw}).eq("email", req.email).execute()
+    hashed_pw = hash_password(new_password)
+    supabase.table("users").update({"password": hashed_pw}).eq("email", email).execute()
+
+    del otp_store[email]
     return {"message": "Password reset successful"}
