@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGoogleAuth } from "../services/googleConfig";
 import { signInWithGoogle } from "../services/api";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { auth } from "../services/firebaseConfig"; // ✅ ใช้ Firebase ที่ตั้งค่าไว้
+import { auth } from "../services/firebaseConfig";
 
 export default function GoogleLogin({ navigation, refCallback }) {
   const { request, promptAsync, response } = useGoogleAuth();
