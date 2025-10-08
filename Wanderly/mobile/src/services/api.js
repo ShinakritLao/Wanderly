@@ -4,13 +4,14 @@ async function handleResponse(res) {
   const text = await res.text();
   try {
     const data = JSON.parse(text);
-    if (!res.ok) throw new Error(data.message || `${res.status} ${res.statusText}`);
+    if (!res.ok) throw new Error(data.message || data.detail || `${res.status} ${res.statusText}`);
     return data;
   } catch {
     if (!res.ok) throw new Error(`${res.status} ${text}`);
     return text;
   }
 }
+
 
 // --- Auth existing functions ---
 export async function signInWithGoogle(idToken) {
@@ -56,16 +57,19 @@ export async function logout(jwt) {
   return handleResponse(res);
 }
 
-// --- Forgot Password Flow ---
+// --- Forgot Password / OTP Flow ---
+
+// Request OTP (must be sent as { email } object)
 export async function requestOtp(email) {
   const res = await fetch(`${API_URL}/auth/request-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email }), 
   });
   return handleResponse(res);
 }
 
+// Verify OTP + Reset Password
 export async function verifyOtpAndResetPassword(email, otp, newPassword) {
   const res = await fetch(`${API_URL}/auth/verify-otp-reset`, {
     method: "POST",
@@ -74,3 +78,13 @@ export async function verifyOtpAndResetPassword(email, otp, newPassword) {
   });
   return handleResponse(res);
 }
+
+// Legacy resetPassword
+export const resetPassword = async (email, newPassword) => {
+  const res = await fetch(`${API_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, newPassword }),
+  });
+  return handleResponse(res);
+};

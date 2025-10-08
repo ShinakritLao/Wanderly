@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
@@ -16,6 +16,8 @@ from firebase_admin import credentials, auth as firebase_auth
 from jose import jwt, JWTError
 from supabase import create_client
 
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+
 # --- Load environment variables ---
 load_dotenv()
 
@@ -25,6 +27,28 @@ SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 SERVICE_ACCOUNT_PATH = os.getenv("SERVICE_ACCOUNT_PATH", "serviceAccountKey.json")
+
+# --- Mail config ---
+MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+MAIL_FROM = os.getenv("MAIL_FROM")
+MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
+MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+MAIL_STARTTLS = os.getenv("MAIL_STARTTLS", "True").lower() == "true"
+MAIL_SSL_TLS = os.getenv("MAIL_SSL_TLS", "False").lower() == "true"
+
+conf = ConnectionConfig(
+    MAIL_USERNAME=MAIL_USERNAME,
+    MAIL_PASSWORD=MAIL_PASSWORD,
+    MAIL_FROM=MAIL_FROM,
+    MAIL_PORT=MAIL_PORT,
+    MAIL_SERVER=MAIL_SERVER,
+    MAIL_STARTTLS=MAIL_STARTTLS,
+    MAIL_SSL_TLS=MAIL_SSL_TLS,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
+)
+fm = FastMail(conf)
 
 # --- Initialize Supabase ---
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -43,14 +67,11 @@ security = HTTPBearer()
 # --- Configure CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # เปลี่ยนเป็น domain frontend จริงตอน deploy
+    allow_origins=["*"],  # Change to the real frontend domain when deploying.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# --- OTP storage (in-memory for demo) ---
-otp_store = {}  # { email: { otp: "123456", expires: datetime } }
 
 # --- Pydantic Schemas ---
 class TokenRequest(BaseModel):
@@ -67,14 +88,6 @@ class LoginRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
-    newPassword: str
-
-class RequestOtpBody(BaseModel):
-    email: EmailStr
-
-class VerifyOtpBody(BaseModel):
-    email: EmailStr
-    otp: str
     newPassword: str
 
 # --- Helper Functions ---
@@ -99,9 +112,8 @@ def verify_password(plain_password, hashed_password):
     safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(safe_password, hashed_password)
 
-# Fake email sender for demo
-def send_email(email: str, otp: str):
-    print(f"[Email sent to {email}]: OTP = {otp}")  # ใช้จริงต้อง integrate กับ SMTP / SendGrid
+# --- OTP storage (ชั่วคราว, แนะนำใช้ Redis/DB จริง) ---
+otp_storage = {}
 
 # ===================================================== #
 #                   GOOGLE LOGIN                        #
@@ -200,46 +212,53 @@ async def dashboard(uid: str = Depends(verify_jwt)):
     return {"user": data[0]}
 
 # ===================================================== #
-#                 RESET PASSWORD / OTP                 #
+#                 RESET PASSWORD / OTP                  #
 # ===================================================== #
+class OTPRequestBody(BaseModel):
+    email: EmailStr
+
+class OTPVerifyBody(BaseModel):
+    email: EmailStr
+    otp: str
+    newPassword: str
+
 @app.post("/auth/request-otp")
-async def request_otp(req: RequestOtpBody, background_tasks: BackgroundTasks):
+async def request_otp(req: OTPRequestBody):
     email = req.email
     resp = supabase.table("users").select("*").eq("email", email).execute()
     users = get_supabase_data(resp)
     if not users:
         raise HTTPException(status_code=404, detail="User not found")
 
-    otp_code = f"{random.randint(100000, 999999)}"
-    otp_store[email] = {"otp": otp_code, "expires": datetime.utcnow() + timedelta(minutes=10)}
-    background_tasks.add_task(send_email, email, otp_code)
-    return {"message": "OTP sent"}
+    otp = str(random.randint(100000, 999999))
+    otp_storage[email] = otp
+
+    # ส่ง OTP ทางอีเมล
+    message = MessageSchema(
+        subject="Your OTP Code",
+        recipients=[email],
+        body=f"Your OTP for password reset is: {otp}",
+        subtype="plain"
+    )
+    await fm.send_message(message)
+
+    return {"message": "OTP sent to your email"}
 
 @app.post("/auth/verify-otp-reset")
-async def verify_otp_reset(req: VerifyOtpBody):
+async def verify_otp_reset(req: OTPVerifyBody):
     email = req.email
     otp = req.otp
     new_password = req.newPassword
 
-    if email not in otp_store:
-        raise HTTPException(status_code=400, detail="No OTP requested for this email")
-
-    otp_data = otp_store[email]
-    if otp_data["otp"] != otp:
+    if email not in otp_storage or otp_storage[email] != otp:
         raise HTTPException(status_code=400, detail="Invalid OTP")
-    if datetime.utcnow() > otp_data["expires"]:
-        del otp_store[email]
-        raise HTTPException(status_code=400, detail="OTP expired")
-
-    # update password
-    resp = supabase.table("users").select("*").eq("email", email).execute()
-    users = get_supabase_data(resp)
-    user = users[0]
-    if user.get("login_type") != "local":
-        raise HTTPException(status_code=400, detail="Cannot reset password for Google accounts")
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
     hashed_pw = hash_password(new_password)
     supabase.table("users").update({"password": hashed_pw}).eq("email", email).execute()
 
-    del otp_store[email]
+    # ลบ OTP หลังใช้แล้ว
+    otp_storage.pop(email, None)
+
     return {"message": "Password reset successful"}

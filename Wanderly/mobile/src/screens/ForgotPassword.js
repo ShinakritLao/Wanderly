@@ -14,7 +14,7 @@ import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { requestOtp, verifyOtpAndResetPassword } from "../services/api";
 
 export default function ForgotPasswordScreen({ navigation }) {
-  const [step, setStep] = useState(1); // 1=ขอ OTP, 2=ยืนยัน OTP + reset password
+  const [step, setStep] = useState(1); // 1=Request OTP, 2=Confirm OTP + reset password
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -26,29 +26,29 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   // Request OTP
   const handleRequestOtp = async () => {
-    setErrorMessage("");
-    if (!email) {
-      setErrorMessage("Please enter your email");
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrorMessage("Please enter a valid email address");
-      return;
-    }
+  setErrorMessage("");
+  if (!email) {
+    setErrorMessage("Please enter your email");
+    return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setErrorMessage("Please enter a valid email address");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await requestOtp(email); // backend ส่ง OTP ไป email + rate limiting
-      Alert.alert("OTP sent", "Please check your email for the OTP");
-      setStep(2);
-    } catch (err) {
-      console.error(err);
-      setErrorMessage(err.message || "Failed to send OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    await requestOtp(email); 
+    Alert.alert("OTP sent", "Please check your email for the OTP");
+    setStep(2);
+  } catch (err) {
+    console.error(err);
+    setErrorMessage(err.message || "Failed to send OTP");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Verify OTP and Reset Password
   const handleVerifyOtpAndReset = async () => {
