@@ -1,5 +1,8 @@
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
+// ----------------------------
+// HANDLE RESPONSE
+// ----------------------------
 async function handleResponse(res) {
   const text = await res.text();
   try {
@@ -37,7 +40,7 @@ export async function sendOtpForSignUp(email) {
   return handleResponse(res);
 }
 
-export async function verifyOtpSignUp(email, otp, password, name) {
+export async function verifyOtpSignUp({ email, otp, password, name }) {
   const res = await fetch(`${API_URL}/auth/verify-otp-signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -47,7 +50,7 @@ export async function verifyOtpSignUp(email, otp, password, name) {
 }
 
 // Email Sign-In
-export async function signInWithEmail(email, password) {
+export async function signInWithEmail({ email, password }) {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -80,11 +83,29 @@ export async function requestOtp(email) {
 }
 
 // Verify OTP + Reset Password
-export async function verifyOtpAndResetPassword(email, otp, newPassword) {
+export async function verifyOtpAndResetPassword({ email, otp, newPassword }) {
   const res = await fetch(`${API_URL}/auth/verify-otp-reset`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, otp, newPassword }),
+  });
+  return handleResponse(res);
+}
+
+// ----------------------------
+// SLIDER CAPTCHA
+// ----------------------------
+
+export async function getSliderCaptcha() {
+  const res = await fetch(`${API_URL}/captcha/slider/generate`);
+  return handleResponse(res);
+}
+
+export async function verifySliderCaptcha({ token, position, tolerance = 5 }) {
+  const res = await fetch(`${API_URL}/captcha/slider/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, position, tolerance }),
   });
   return handleResponse(res);
 }

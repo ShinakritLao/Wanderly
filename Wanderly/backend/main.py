@@ -1,6 +1,8 @@
 import os
 import uuid
 import random
+import string
+import urllib.parse
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -18,7 +20,7 @@ from supabase import create_client
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
-# --- Load environment variables ---
+# ----------------- Load environment variables -----------------
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -28,7 +30,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 SERVICE_ACCOUNT_PATH = os.getenv("SERVICE_ACCOUNT_PATH", "serviceAccountKey.json")
 
-# --- Mail config ---
+# ----------------- Mail config -----------------
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM")
@@ -50,30 +52,30 @@ conf = ConnectionConfig(
 )
 fm = FastMail(conf)
 
-# --- Initialize Supabase ---
+# ----------------- Initialize Supabase -----------------
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# --- Initialize Firebase Admin SDK ---
+# ----------------- Initialize Firebase -----------------
 cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
 firebase_admin.initialize_app(cred)
 
-# --- Password Hashing Setup ---
+# ----------------- Password Hashing -----------------
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# --- Initialize FastAPI ---
+# ----------------- FastAPI Setup -----------------
 app = FastAPI()
 security = HTTPBearer()
 
-# --- Configure CORS ---
+# ----------------- CORS -----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # เปลี่ยนเป็นโดเมนจริงตอน deploy
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Helper Functions ---
+# ----------------- Helper Functions -----------------
 def get_supabase_data(resp):
     if hasattr(resp, "data") and resp.data is not None:
         return resp.data
@@ -95,11 +97,14 @@ def verify_password(plain_password, hashed_password):
     safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(safe_password, hashed_password)
 
-# --- OTP storage (ชั่วคราว) ---
+# ----------------- OTP Storage -----------------
 otp_storage = {}
 
+# ----------------- Slider CAPTCHA Storage -----------------
+slider_captcha_storage = {}
+
 # ===================================================== #
-#                   GOOGLE LOGIN                        #
+#                       GOOGLE LOGIN                    #
 # ===================================================== #
 class TokenRequest(BaseModel):
     id_token: str
@@ -132,7 +137,7 @@ async def auth_google(payload: TokenRequest):
         raise HTTPException(status_code=401, detail=f"Invalid Google token: {str(e)}")
 
 # ===================================================== #
-#                 REGISTER + LOGIN (LOCAL)              #
+#                 REGISTER + LOGIN (LOCAL)             #
 # ===================================================== #
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -161,7 +166,7 @@ async def login_user(req: LoginRequest):
     return {"access_token": token, "user": user}
 
 # ===================================================== #
-#             JWT VERIFY + PROTECTED ROUTE              #
+#             JWT VERIFY + PROTECTED ROUTE             #
 # ===================================================== #
 def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
@@ -183,7 +188,7 @@ async def dashboard(uid: str = Depends(verify_jwt)):
     return {"user": data[0]}
 
 # ===================================================== #
-#                 OTP FOR PASSWORD RESET                #
+#                 OTP FOR PASSWORD RESET               #
 # ===================================================== #
 class OTPRequestBody(BaseModel):
     email: EmailStr
@@ -211,7 +216,6 @@ async def request_otp(req: OTPRequestBody):
         subtype="plain"
     )
     await fm.send_message(message)
-
     return {"message": "OTP sent to your email"}
 
 @app.post("/auth/verify-otp-reset")
@@ -229,7 +233,6 @@ async def verify_otp_reset(req: OTPVerifyBody):
     hashed_pw = hash_password(new_password)
     supabase.table("users").update({"password": hashed_pw}).eq("email", email).execute()
     otp_storage.pop(email, None)
-
     return {"message": "Password reset successful"}
 
 # ===================================================== #
@@ -258,7 +261,6 @@ async def send_otp_signup(req: OTPRequestBody):
         subtype="plain"
     )
     await fm.send_message(message)
-
     return {"message": "OTP sent to your email for signup verification"}
 
 @app.post("/auth/verify-otp-signup")
@@ -292,5 +294,60 @@ async def verify_otp_signup(req: VerifySignupOTPBody):
     supabase.table("users").insert(user).execute()
     token = create_access_token(subject=user["uid"])
     otp_storage.pop(email, None)
-
     return {"message": "Signup successful", "access_token": token, "user": user}
+
+# ===================================================== #
+#                 SLIDER PUZZLE CAPTCHA                #
+# ===================================================== #
+class SliderCaptchaGenerateResponse(BaseModel):
+    token: str
+    puzzle_url: str
+    cutout_x: int
+    slider_width: int
+    expires_at: datetime
+
+def random_text(length=10):
+    chars = string.ascii_letters + string.digits + " "
+    return ''.join(random.choice(chars) for _ in range(length))
+
+@app.get("/captcha/slider/generate", response_model=SliderCaptchaGenerateResponse)
+async def generate_slider_captcha():
+    token = uuid.uuid4().hex
+    cutout_x = random.randint(30, 250)
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+
+    slider_captcha_storage[token] = {
+        "solution": cutout_x,
+        "expires_at": expires_at
+    }
+
+    text_length = 12
+    text = random_text(text_length)
+    encoded_text = urllib.parse.quote_plus(text)
+    puzzle_url = f"https://dummyimage.com/300x150/000/fff.png&text={encoded_text}"
+
+    return SliderCaptchaGenerateResponse(
+        token=token,
+        puzzle_url=puzzle_url,
+        cutout_x=cutout_x,
+        slider_width=100,
+        expires_at=expires_at
+    )
+
+class SliderCaptchaVerifyRequest(BaseModel):
+    token: str
+    position: int
+    tolerance: int = 5
+
+@app.post("/captcha/slider/verify")
+async def verify_slider_captcha(payload: SliderCaptchaVerifyRequest):
+    data = slider_captcha_storage.get(payload.token)
+    if not data:
+        raise HTTPException(status_code=400, detail="Invalid CAPTCHA token")
+    if datetime.utcnow() > data["expires_at"]:
+        slider_captcha_storage.pop(payload.token, None)
+        raise HTTPException(status_code=400, detail="CAPTCHA expired")
+    if abs(payload.position - data["solution"]) > payload.tolerance:
+        raise HTTPException(status_code=400, detail="Incorrect slider position")
+    slider_captcha_storage.pop(payload.token, None)
+    return {"message": "Slider CAPTCHA verified successfully"}

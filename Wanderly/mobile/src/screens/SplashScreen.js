@@ -1,15 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Image, ActivityIndicator, Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
+import SliderCaptcha from "../screens/SliderCaptcha"; // อย่าลืมสร้างไฟล์นี้
 
 export default function SplashScreen({ navigation }) {
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
+  const [showCaptcha, setShowCaptcha] = useState(false);
 
   const startAnimation = (callback) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 1000,
+      duration: 800,
       useNativeDriver: true,
     }).start(() => callback && callback());
   };
@@ -19,22 +21,26 @@ export default function SplashScreen({ navigation }) {
       try {
         const jwt = await AsyncStorage.getItem("jwt");
         setTimeout(() => {
-          startAnimation(() => {
-            if (jwt) {
-              navigation.replace("Dashboard");
-            } else {
-              navigation.replace("SignIn");
-            }
-          });
-        }, 2000);
+          setShowCaptcha(true);
+        }, 1500);
       } catch (err) {
         console.error("Error reading JWT:", err);
-        navigation.replace("SignIn");
+        setShowCaptcha(true);
       }
     };
-
     checkLogin();
   }, []);
+
+  const handleCaptchaSuccess = async () => {
+    const jwt = await AsyncStorage.getItem("jwt");
+    startAnimation(() => {
+      if (jwt) {
+        navigation.replace("Dashboard");
+      } else {
+        navigation.replace("SignIn");
+      }
+    });
+  };
 
   return (
     <Animated.View style={[styles.animContainer, { opacity: fadeAnim }]}>
@@ -48,11 +54,18 @@ export default function SplashScreen({ navigation }) {
             style={styles.logo}
             resizeMode="contain"
           />
-          <ActivityIndicator 
-            size="large" 
-            color="#FFFFFF" 
-            style={styles.loader}
-          />
+          {!showCaptcha && (
+            <ActivityIndicator 
+              size="large" 
+              color="#FFFFFF" 
+              style={styles.loader}
+            />
+          )}
+          {showCaptcha && (
+            <View style={styles.captchaWrapper}>
+              <SliderCaptcha onSuccess={handleCaptchaSuccess} />
+            </View>
+          )}
         </View>
       </LinearGradient>
     </Animated.View>
@@ -71,6 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    width: '100%',
   },
   logo: {
     width: 360,
@@ -78,6 +92,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   loader: {
+    marginTop: 20,
+  },
+  captchaWrapper: {
+    width: '100%',
+    alignItems: 'center',
     marginTop: 20,
   }
 });
