@@ -4,7 +4,8 @@ async function handleResponse(res) {
   const text = await res.text();
   try {
     const data = JSON.parse(text);
-    if (!res.ok) throw new Error(data.message || data.detail || `${res.status} ${res.statusText}`);
+    if (!res.ok)
+      throw new Error(data.message || data.detail || `${res.status} ${res.statusText}`);
     return data;
   } catch {
     if (!res.ok) throw new Error(`${res.status} ${text}`);
@@ -12,8 +13,11 @@ async function handleResponse(res) {
   }
 }
 
+// ----------------------------
+// AUTH FUNCTIONS
+// ----------------------------
 
-// --- Auth existing functions ---
+// Google Sign-In
 export async function signInWithGoogle(idToken) {
   const res = await fetch(`${API_URL}/auth/google`, {
     method: "POST",
@@ -23,15 +27,26 @@ export async function signInWithGoogle(idToken) {
   return handleResponse(res);
 }
 
-export async function signUpWithEmail(email, password, name) {
-  const res = await fetch(`${API_URL}/auth/register`, {
+// Email Sign-Up with OTP
+export async function sendOtpForSignUp(email) {
+  const res = await fetch(`${API_URL}/auth/send-otp-signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, name }),
+    body: JSON.stringify({ email }),
   });
   return handleResponse(res);
 }
 
+export async function verifyOtpSignUp(email, otp, password, name) {
+  const res = await fetch(`${API_URL}/auth/verify-otp-signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp, password, name }),
+  });
+  return handleResponse(res);
+}
+
+// Email Sign-In
 export async function signInWithEmail(email, password) {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
@@ -41,6 +56,7 @@ export async function signInWithEmail(email, password) {
   return handleResponse(res);
 }
 
+// Protected dashboard route
 export async function fetchDashboard(jwt) {
   const res = await fetch(`${API_URL}/dashboard`, {
     method: "GET",
@@ -49,22 +65,16 @@ export async function fetchDashboard(jwt) {
   return handleResponse(res);
 }
 
-export async function logout(jwt) {
-  const res = await fetch(`${API_URL}/auth/logout`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${jwt}` },
-  });
-  return handleResponse(res);
-}
+// ----------------------------
+// OTP / PASSWORD RESET
+// ----------------------------
 
-// --- Forgot Password / OTP Flow ---
-
-// Request OTP (must be sent as { email } object)
+// Request OTP
 export async function requestOtp(email) {
   const res = await fetch(`${API_URL}/auth/request-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }), 
+    body: JSON.stringify({ email }),
   });
   return handleResponse(res);
 }
@@ -78,13 +88,3 @@ export async function verifyOtpAndResetPassword(email, otp, newPassword) {
   });
   return handleResponse(res);
 }
-
-// Legacy resetPassword
-export const resetPassword = async (email, newPassword) => {
-  const res = await fetch(`${API_URL}/auth/reset-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, newPassword }),
-  });
-  return handleResponse(res);
-};

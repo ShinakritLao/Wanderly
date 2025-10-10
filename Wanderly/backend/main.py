@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status, Body
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
@@ -67,28 +67,11 @@ security = HTTPBearer()
 # --- Configure CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to the real frontend domain when deploying.
+    allow_origins=["*"],  # เปลี่ยนเป็นโดเมนจริงตอน deploy
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# --- Pydantic Schemas ---
-class TokenRequest(BaseModel):
-    id_token: str
-
-class RegisterRequest(BaseModel):
-    email: EmailStr
-    password: str
-    name: Optional[str] = None
-
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-class ResetPasswordRequest(BaseModel):
-    email: EmailStr
-    newPassword: str
 
 # --- Helper Functions ---
 def get_supabase_data(resp):
@@ -112,12 +95,15 @@ def verify_password(plain_password, hashed_password):
     safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(safe_password, hashed_password)
 
-# --- OTP storage (ชั่วคราว, แนะนำใช้ Redis/DB จริง) ---
+# --- OTP storage (ชั่วคราว) ---
 otp_storage = {}
 
 # ===================================================== #
 #                   GOOGLE LOGIN                        #
 # ===================================================== #
+class TokenRequest(BaseModel):
+    id_token: str
+
 @app.post("/auth/google")
 async def auth_google(payload: TokenRequest):
     try:
@@ -146,31 +132,16 @@ async def auth_google(payload: TokenRequest):
         raise HTTPException(status_code=401, detail=f"Invalid Google token: {str(e)}")
 
 # ===================================================== #
-#             EMAIL + PASSWORD LOGIN SYSTEM             #
+#                 REGISTER + LOGIN (LOCAL)              #
 # ===================================================== #
-@app.post("/auth/register")
-async def register_user(req: RegisterRequest):
-    if len(req.password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: Optional[str] = None
 
-    resp = supabase.table("users").select("*").eq("email", req.email).execute()
-    existing = get_supabase_data(resp)
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    hashed_pw = hash_password(req.password)
-    user = {
-        "email": req.email,
-        "password": hashed_pw,
-        "name": req.name or req.email.split("@")[0],
-        "uid": f"local_{uuid.uuid4().hex}",
-        "picture": None,
-        "login_type": "local"
-    }
-
-    supabase.table("users").insert(user).execute()
-    token = create_access_token(subject=user["uid"])
-    return {"access_token": token, "user": user}
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
 @app.post("/auth/login")
 async def login_user(req: LoginRequest):
@@ -212,7 +183,7 @@ async def dashboard(uid: str = Depends(verify_jwt)):
     return {"user": data[0]}
 
 # ===================================================== #
-#                 RESET PASSWORD / OTP                  #
+#                 OTP FOR PASSWORD RESET                #
 # ===================================================== #
 class OTPRequestBody(BaseModel):
     email: EmailStr
@@ -233,7 +204,6 @@ async def request_otp(req: OTPRequestBody):
     otp = str(random.randint(100000, 999999))
     otp_storage[email] = otp
 
-    # ส่ง OTP ทางอีเมล
     message = MessageSchema(
         subject="Your OTP Code",
         recipients=[email],
@@ -252,13 +222,75 @@ async def verify_otp_reset(req: OTPVerifyBody):
 
     if email not in otp_storage or otp_storage[email] != otp:
         raise HTTPException(status_code=400, detail="Invalid OTP")
+
     if len(new_password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
     hashed_pw = hash_password(new_password)
     supabase.table("users").update({"password": hashed_pw}).eq("email", email).execute()
-
-    # ลบ OTP หลังใช้แล้ว
     otp_storage.pop(email, None)
 
     return {"message": "Password reset successful"}
+
+# ===================================================== #
+#                 OTP SIGNUP FLOW                       #
+# ===================================================== #
+class VerifySignupOTPBody(BaseModel):
+    email: EmailStr
+    otp: str
+    password: str
+    name: Optional[str] = None
+
+@app.post("/auth/send-otp-signup")
+async def send_otp_signup(req: OTPRequestBody):
+    resp = supabase.table("users").select("*").eq("email", req.email).execute()
+    existing = get_supabase_data(resp)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    otp = str(random.randint(100000, 999999))
+    otp_storage[req.email] = otp
+
+    message = MessageSchema(
+        subject="Your Wanderly Signup OTP",
+        recipients=[req.email],
+        body=f"Your OTP for signup is: {otp}",
+        subtype="plain"
+    )
+    await fm.send_message(message)
+
+    return {"message": "OTP sent to your email for signup verification"}
+
+@app.post("/auth/verify-otp-signup")
+async def verify_otp_signup(req: VerifySignupOTPBody):
+    email = req.email
+    otp = req.otp
+    password = req.password
+    name = req.name
+
+    if email not in otp_storage or otp_storage[email] != otp:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+
+    resp = supabase.table("users").select("*").eq("email", email).execute()
+    existing = get_supabase_data(resp)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    if len(password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+
+    hashed_pw = hash_password(password)
+    user = {
+        "email": email,
+        "password": hashed_pw,
+        "name": name or email.split("@")[0],
+        "uid": f"local_{uuid.uuid4().hex}",
+        "picture": None,
+        "login_type": "local"
+    }
+
+    supabase.table("users").insert(user).execute()
+    token = create_access_token(subject=user["uid"])
+    otp_storage.pop(email, None)
+
+    return {"message": "Signup successful", "access_token": token, "user": user}
