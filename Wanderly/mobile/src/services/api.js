@@ -40,7 +40,7 @@ export async function sendOtpForSignUp(email) {
   return handleResponse(res);
 }
 
-export async function verifyOtpSignUp({ email, otp, password, name }) {
+export async function verifyOtpSignUp(email, otp, password, name) {
   const res = await fetch(`${API_URL}/auth/verify-otp-signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -50,7 +50,7 @@ export async function verifyOtpSignUp({ email, otp, password, name }) {
 }
 
 // Email Sign-In
-export async function signInWithEmail({ email, password }) {
+export async function signInWithEmail(email, password) {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -83,7 +83,7 @@ export async function requestOtp(email) {
 }
 
 // Verify OTP + Reset Password
-export async function verifyOtpAndResetPassword({ email, otp, newPassword }) {
+export async function verifyOtpAndResetPassword(email, otp, newPassword) {
   const res = await fetch(`${API_URL}/auth/verify-otp-reset`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
