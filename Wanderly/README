@@ -24,5 +24,4 @@ npm install react-native-web
 npm install react-google-recaptcha-v3
 npm install @react-native-community/slider
 npm install rc-slider
-pip install requests
 npm start -c
