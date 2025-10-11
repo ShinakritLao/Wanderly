@@ -152,6 +152,13 @@ const SignUpScreen = ({ navigation }) => {
               <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp} disabled={loading}>
                 <Text style={styles.signUpButtonText}>{loading ? "Sending OTP..." : "Sign up"}</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+                <Text style={styles.linkText}>
+                  Have an account?{" "}
+                  <Text style={styles.signUpText}>Sign in</Text>
+                  </Text>
+              </TouchableOpacity>
             </>
           ) : (
             <>
@@ -172,6 +179,7 @@ const SignUpScreen = ({ navigation }) => {
               <TouchableOpacity style={styles.signUpButton} onPress={handleVerifyOtp} disabled={loading}>
                 <Text style={styles.signUpButtonText}>{loading ? "Verifying..." : "Verify OTP"}</Text>
               </TouchableOpacity>
+              
             </>
           )}
         </View>
@@ -191,6 +199,8 @@ const styles = StyleSheet.create({
   errorText: { color: "red", marginBottom: 10, fontSize: 14 },
   signUpButton: { backgroundColor: "#1a73e8", borderRadius: 12, padding: 16, alignItems: "center", marginTop: 10 },
   signUpButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  linkText: {textAlign: "center", marginTop: 20, fontSize: 14, color: "#666",},
+  signUpText: { color: "#1a73e8", fontWeight: "600",},
 });
 
 export default SignUpScreen;
