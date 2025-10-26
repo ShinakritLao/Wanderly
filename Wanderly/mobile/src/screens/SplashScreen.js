@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Image, ActivityIndicator, Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
-import SliderCaptcha from "../screens/SliderCaptcha"; // อย่าลืมสร้างไฟล์นี้
 
 export default function SplashScreen({ navigation }) {
-  const fadeAnim = React.useRef(new Animated.Value(1)).current;
-  const [showCaptcha, setShowCaptcha] = useState(false);
+  const fadeAnim = React.useRef(new Animated.Value(1)).current; // Animation value for fade-out
 
+  // Fade-out animation
   const startAnimation = (callback) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
@@ -19,28 +18,25 @@ export default function SplashScreen({ navigation }) {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const jwt = await AsyncStorage.getItem("jwt");
+        const jwt = await AsyncStorage.getItem("jwt"); // Check if user is logged in
+
+        // Show splash screen for 1.5s, then navigate
         setTimeout(() => {
-          setShowCaptcha(true);
+          startAnimation(() => {
+            if (jwt) {
+              navigation.replace("Dashboard"); // Navigate to dashboard if logged in
+            } else {
+              navigation.replace("SignIn");   // Otherwise, go to sign-in
+            }
+          });
         }, 1500);
       } catch (err) {
         console.error("Error reading JWT:", err);
-        setShowCaptcha(true);
+        navigation.replace("SignIn"); // Fallback to sign-in on error
       }
     };
     checkLogin();
   }, []);
-
-  const handleCaptchaSuccess = async () => {
-    const jwt = await AsyncStorage.getItem("jwt");
-    startAnimation(() => {
-      if (jwt) {
-        navigation.replace("Dashboard");
-      } else {
-        navigation.replace("SignIn");
-      }
-    });
-  };
 
   return (
     <Animated.View style={[styles.animContainer, { opacity: fadeAnim }]}>
@@ -49,23 +45,18 @@ export default function SplashScreen({ navigation }) {
         style={styles.container}
       >
         <View style={styles.contentContainer}>
+          {/* App logo */}
           <Image
             source={require('../assets/wanderly-logo-white.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-          {!showCaptcha && (
-            <ActivityIndicator 
-              size="large" 
-              color="#FFFFFF" 
-              style={styles.loader}
-            />
-          )}
-          {showCaptcha && (
-            <View style={styles.captchaWrapper}>
-              <SliderCaptcha onSuccess={handleCaptchaSuccess} />
-            </View>
-          )}
+          {/* Loading spinner */}
+          <ActivityIndicator 
+            size="large" 
+            color="#FFFFFF" 
+            style={styles.loader}
+          />
         </View>
       </LinearGradient>
     </Animated.View>
@@ -94,9 +85,4 @@ const styles = StyleSheet.create({
   loader: {
     marginTop: 20,
   },
-  captchaWrapper: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: 20,
-  }
 });

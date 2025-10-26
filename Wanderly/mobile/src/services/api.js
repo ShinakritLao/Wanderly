@@ -3,6 +3,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL;
 // ----------------------------
 // HANDLE RESPONSE
 // ----------------------------
+// Parse API response and throw error if not ok
 async function handleResponse(res) {
   const text = await res.text();
   try {
@@ -72,7 +73,7 @@ export async function fetchDashboard(jwt) {
 // OTP / PASSWORD RESET
 // ----------------------------
 
-// Request OTP
+// Request OTP for password reset
 export async function requestOtp(email) {
   const res = await fetch(`${API_URL}/auth/request-otp`, {
     method: "POST",
@@ -82,7 +83,7 @@ export async function requestOtp(email) {
   return handleResponse(res);
 }
 
-// Verify OTP + Reset Password
+// Verify OTP and reset password
 export async function verifyOtpAndResetPassword(email, otp, newPassword) {
   const res = await fetch(`${API_URL}/auth/verify-otp-reset`, {
     method: "POST",
@@ -96,11 +97,13 @@ export async function verifyOtpAndResetPassword(email, otp, newPassword) {
 // SLIDER CAPTCHA
 // ----------------------------
 
+// Generate slider captcha
 export async function getSliderCaptcha() {
   const res = await fetch(`${API_URL}/captcha/slider/generate`);
   return handleResponse(res);
 }
 
+// Verify slider captcha position
 export async function verifySliderCaptcha({ token, position, tolerance = 5 }) {
   const res = await fetch(`${API_URL}/captcha/slider/verify`, {
     method: "POST",

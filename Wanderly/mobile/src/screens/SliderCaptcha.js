@@ -1,30 +1,22 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Image,
-  StyleSheet,
-  PanResponder,
-  Animated,
-  Text,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import {View, Image, StyleSheet, PanResponder, Animated, Text, Alert, ActivityIndicator} from "react-native";
 import { getSliderCaptcha, verifySliderCaptcha } from "../services/api";
 
 export default function SliderCaptcha({ onSuccess }) {
-  const [captcha, setCaptcha] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [pan] = useState(new Animated.Value(0));
+  const [captcha, setCaptcha] = useState(null); // Captcha data from API
+  const [loading, setLoading] = useState(true); // Loading state
+  const [pan] = useState(new Animated.Value(0)); // Slider thumb position
 
   const sliderTrackWidth = 300;
   const thumbWidth = 50;
 
+  // Fetch a new slider CAPTCHA from server
   const fetchCaptcha = async () => {
     setLoading(true);
     try {
       const data = await getSliderCaptcha();
       setCaptcha(data);
-      pan.setValue(0);
+      pan.setValue(0); // Reset slider position
     } catch (err) {
       Alert.alert("Error", err.message || "Failed to load CAPTCHA");
     } finally {
@@ -33,12 +25,14 @@ export default function SliderCaptcha({ onSuccess }) {
   };
 
   useEffect(() => {
-    fetchCaptcha();
+    fetchCaptcha(); // Load CAPTCHA on mount
   }, []);
 
+  // Slider drag handling
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: (_, gestureState) => {
+      // Clamp thumb position within track
       let newX = gestureState.dx;
       if (newX < 0) newX = 0;
       if (newX > sliderTrackWidth - thumbWidth)
@@ -48,16 +42,17 @@ export default function SliderCaptcha({ onSuccess }) {
     onPanResponderRelease: async () => {
       const position = pan.__getValue();
       try {
+        // Verify slider position with server
         await verifySliderCaptcha({
           token: captcha.token,
           position,
           tolerance: 5,
         });
         Alert.alert("✅ Success", "CAPTCHA verified!");
-        onSuccess && onSuccess();
+        onSuccess && onSuccess(); // Callback if verification succeeds
       } catch (err) {
         Alert.alert("❌ Failed", err.message || "Incorrect slider position");
-        fetchCaptcha();
+        fetchCaptcha(); // Reload CAPTCHA on failure
       }
     },
   });
@@ -82,7 +77,7 @@ export default function SliderCaptcha({ onSuccess }) {
         Slide the puzzle to verify
       </Text>
 
-      {/* ===== CAPTCHA ===== */}
+      {/* ===== CAPTCHA IMAGE WITH CUTOUT ===== */}
       <View style={styles.puzzleContainer}>
         <Image
           source={{ uri: captcha.puzzle_url }}
@@ -93,7 +88,7 @@ export default function SliderCaptcha({ onSuccess }) {
           }}
         />
 
-        {/* cutout hint */}
+        {/* Visual hint for the slider cutout */}
         <View
           style={{
             position: "absolute",
@@ -109,13 +104,13 @@ export default function SliderCaptcha({ onSuccess }) {
         />
       </View>
 
-      {/* ===== Slider ===== */}
+      {/* ===== SLIDER THUMB ===== */}
       <View style={[styles.sliderTrack, { width: sliderTrackWidth }]}>
         <Animated.View
           {...panResponder.panHandlers}
           style={[
             styles.sliderThumb,
-            { transform: [{ translateX: pan }] },
+            { transform: [{ translateX: pan }] }, // Move thumb along X-axis
           ]}
         />
       </View>

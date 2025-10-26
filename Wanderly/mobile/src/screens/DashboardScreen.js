@@ -6,24 +6,22 @@ import { signOut } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 
 export default function DashboardScreen({ navigation }) {
-  const [user, setUser] = useState(null);  // User data
-  const [loading, setLoading] = useState(true); // Loading state
+  const [user, setUser] = useState(null);      // Current user data
+  const [loading, setLoading] = useState(true); // Loading indicator
 
-  // User data loading function
+  // Fetch user data from backend
   const load = async () => {
     setLoading(true);
     try {
-      const jwt = await AsyncStorage.getItem("jwt"); // Read JWT from AsyncStorage
+      const jwt = await AsyncStorage.getItem("jwt"); // Get JWT token
       if (!jwt) {
-        navigation.replace("SignIn"); // If there is no token -> Return to the SignIn page.
+        navigation.replace("SignIn"); // Redirect if token not found
         return;
       }
-
-      // Fetch data from the backend with JWT
-      const res = await fetchDashboard(jwt);
+      const res = await fetchDashboard(jwt);   // Fetch dashboard info
       setUser(res.user);
     } catch (e) {
-      console.warn("Error fetching dashboard:", e);
+      console.warn("Dashboard fetch error:", e);
       Alert.alert("Session expired", "Please sign in again.");
       await AsyncStorage.removeItem("jwt");
       navigation.replace("SignIn");
@@ -33,21 +31,21 @@ export default function DashboardScreen({ navigation }) {
   };
 
   useEffect(() => {
-    load(); // Load data when the Dashboard page is opened
+    load(); // Load data when screen mounts
   }, []);
 
-  // Logout function
+  // Handle user logout
   const handleLogout = async () => {
     try {
-      await signOut(auth);                  // leave from Firebase
-      await AsyncStorage.removeItem("jwt"); // delete JWT
-      navigation.replace("SignIn");         // goback SignIn
+      await signOut(auth);                  // Sign out from Firebase
+      await AsyncStorage.removeItem("jwt"); // Clear token
+      navigation.replace("SignIn");         // Go to sign-in page
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
-  // Show page while loading data
+  // Show loading spinner
   if (loading) {
     return (
       <View style={styles.container}>
@@ -102,4 +100,3 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
 });
-  

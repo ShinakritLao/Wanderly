@@ -20,9 +20,10 @@ from supabase import create_client
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
-# ----------------- Load environment variables -----------------
+# Load environment variables
 load_dotenv()
 
+# Environment configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
@@ -30,7 +31,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 SERVICE_ACCOUNT_PATH = os.getenv("SERVICE_ACCOUNT_PATH", "serviceAccountKey.json")
 
-# ----------------- Mail config -----------------
+# Mail configuration
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM")
@@ -52,21 +53,19 @@ conf = ConnectionConfig(
 )
 fm = FastMail(conf)
 
-# ----------------- Initialize Supabase -----------------
+# Initialize Supabase and Firebase
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# ----------------- Initialize Firebase -----------------
 cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
 firebase_admin.initialize_app(cred)
 
-# ----------------- Password Hashing -----------------
+# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# ----------------- FastAPI Setup -----------------
+# FastAPI setup
 app = FastAPI()
 security = HTTPBearer()
 
-# ----------------- CORS -----------------
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -75,7 +74,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ----------------- Helper Functions -----------------
+# ---------------- Helper functions ----------------
 def get_supabase_data(resp):
     if hasattr(resp, "data") and resp.data is not None:
         return resp.data
@@ -97,15 +96,13 @@ def verify_password(plain_password, hashed_password):
     safe_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(safe_password, hashed_password)
 
-# ----------------- OTP Storage -----------------
+# Temporary storages
 otp_storage = {}
-
-# ----------------- Slider CAPTCHA Storage -----------------
 slider_captcha_storage = {}
 
-# ===================================================== #
-#                       GOOGLE LOGIN                    #
-# ===================================================== #
+# =====================================================
+#                    GOOGLE LOGIN
+# =====================================================
 class TokenRequest(BaseModel):
     id_token: str
 
@@ -136,9 +133,9 @@ async def auth_google(payload: TokenRequest):
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Invalid Google token: {str(e)}")
 
-# ===================================================== #
-#                 REGISTER + LOGIN (LOCAL)             #
-# ===================================================== #
+# =====================================================
+#               REGISTER & LOGIN (LOCAL)
+# =====================================================
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
@@ -165,9 +162,9 @@ async def login_user(req: LoginRequest):
     token = create_access_token(subject=user["uid"])
     return {"access_token": token, "user": user}
 
-# ===================================================== #
-#             JWT VERIFY + PROTECTED ROUTE             #
-# ===================================================== #
+# =====================================================
+#              JWT VERIFY & DASHBOARD
+# =====================================================
 def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
@@ -187,9 +184,9 @@ async def dashboard(uid: str = Depends(verify_jwt)):
         raise HTTPException(status_code=404, detail="User not found")
     return {"user": data[0]}
 
-# ===================================================== #
-#                 OTP FOR PASSWORD RESET               #
-# ===================================================== #
+# =====================================================
+#                OTP PASSWORD RESET
+# =====================================================
 class OTPRequestBody(BaseModel):
     email: EmailStr
 
@@ -228,16 +225,16 @@ async def verify_otp_reset(req: OTPVerifyBody):
         raise HTTPException(status_code=400, detail="Invalid OTP")
 
     if len(new_password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+        raise HTTPException(status_code=400, detail="Password too short")
 
     hashed_pw = hash_password(new_password)
     supabase.table("users").update({"password": hashed_pw}).eq("email", email).execute()
     otp_storage.pop(email, None)
     return {"message": "Password reset successful"}
 
-# ===================================================== #
-#                 OTP SIGNUP FLOW                       #
-# ===================================================== #
+# =====================================================
+#                 OTP SIGNUP FLOW
+# =====================================================
 class VerifySignupOTPBody(BaseModel):
     email: EmailStr
     otp: str
@@ -261,7 +258,7 @@ async def send_otp_signup(req: OTPRequestBody):
         subtype="plain"
     )
     await fm.send_message(message)
-    return {"message": "OTP sent to your email for signup verification"}
+    return {"message": "OTP sent for signup verification"}
 
 @app.post("/auth/verify-otp-signup")
 async def verify_otp_signup(req: VerifySignupOTPBody):
@@ -279,7 +276,7 @@ async def verify_otp_signup(req: VerifySignupOTPBody):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     if len(password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+        raise HTTPException(status_code=400, detail="Password too short")
 
     hashed_pw = hash_password(password)
     user = {
@@ -296,9 +293,9 @@ async def verify_otp_signup(req: VerifySignupOTPBody):
     otp_storage.pop(email, None)
     return {"message": "Signup successful", "access_token": token, "user": user}
 
-# ===================================================== #
-#                 SLIDER PUZZLE CAPTCHA                #
-# ===================================================== #
+# =====================================================
+#               SLIDER CAPTCHA GENERATOR
+# =====================================================
 class SliderCaptchaGenerateResponse(BaseModel):
     token: str
     puzzle_url: str
@@ -321,8 +318,7 @@ async def generate_slider_captcha():
         "expires_at": expires_at
     }
 
-    text_length = 12
-    text = random_text(text_length)
+    text = random_text(12)
     encoded_text = urllib.parse.quote_plus(text)
     puzzle_url = f"https://dummyimage.com/300x150/000/fff.png&text={encoded_text}"
 

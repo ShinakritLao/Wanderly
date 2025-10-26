@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {View, Text, TextInput, ActivityIndicator, TouchableOpacity, Image, StyleSheet} from "react-native";
+import {View, Text, TextInput, ActivityIndicator, TouchableOpacity, Image, StyleSheet, Modal} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { signInWithEmail } from "../services/api";
 import GoogleLogin from "./GoogleLogin";
+import SliderCaptcha from "../screens/SliderCaptcha";
 
 const SignInScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
@@ -12,16 +13,15 @@ const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showCaptcha, setShowCaptcha] = useState(false);
   const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
 
   useEffect(() => {
+    // Redirect to dashboard if JWT exists
     const checkLogin = async () => {
       try {
         const jwt = await AsyncStorage.getItem("jwt");
-        if (jwt) {
-          navigation.replace("Dashboard");
-          return;
-        }
+        if (jwt) navigation.replace("Dashboard");
       } catch (err) {
         console.error("Error reading JWT:", err);
       } finally {
@@ -31,40 +31,35 @@ const SignInScreen = ({ navigation }) => {
     checkLogin();
   }, []);
 
+  // Validate inputs and show CAPTCHA
+  const handleBeforeSignIn = () => {
+    setErrorMessage("");
+    if (!email || !password) return setErrorMessage("Please fill in both email and password.");
+    setShowCaptcha(true);
+  };
+
+  // Called when CAPTCHA is solved successfully
+  const handleCaptchaSuccess = () => {
+    setShowCaptcha(false);
+    handleSignIn();
+  };
+
+  // Perform sign-in via API
   const handleSignIn = async () => {
     setErrorMessage("");
-
-    if (!email || !password) {
-      setErrorMessage("Please fill in both email and password.");
-      return;
-    }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setErrorMessage("Password must be at least 8 characters long.");
-      return;
-    }
+    if (!emailRegex.test(email)) return setErrorMessage("Please enter a valid email address.");
+    if (password.length < 8) return setErrorMessage("Password must be at least 8 characters long.");
 
     setLoading(true);
-
     try {
       const data = await signInWithEmail(email, password);
-
-      if (!data || !data.access_token) {
-        setErrorMessage("No account found with this email or incorrect password.");
-        return;
-      }
-
+      if (!data?.access_token) return setErrorMessage("Incorrect email or password.");
       await AsyncStorage.setItem("jwt", data.access_token);
       navigation.replace("Dashboard");
     } catch (err) {
       console.error("Sign In Error:", err);
-      setErrorMessage("No account found with this email or incorrect password.");
+      setErrorMessage("Incorrect email or password.");
     } finally {
       setLoading(false);
     }
@@ -80,21 +75,15 @@ const SignInScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={["#13A1E1", "#135497", "#1B1462"]}
-        style={styles.gradientHeader}
-      >
-        <Image
-          source={require("../assets/wanderly-logo-white.png")}
-          style={styles.logoImage}
-        />
+      {/* Header with gradient background and logo */}
+      <LinearGradient colors={["#13A1E1", "#135497", "#1B1462"]} style={styles.gradientHeader}>
+        <Image source={require("../assets/wanderly-logo-white.png")} style={styles.logoImage} />
       </LinearGradient>
 
+      {/* Sign-in form container */}
       <View style={styles.formWrapper}>
         <View style={styles.formContainer}>
-          <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>
-            Welcome Back
-          </Text>
+          <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>Welcome Back</Text>
 
           <TextInput
             style={styles.input}
@@ -105,7 +94,6 @@ const SignInScreen = ({ navigation }) => {
             keyboardType="email-address"
             placeholderTextColor="#999"
           />
-
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -115,62 +103,45 @@ const SignInScreen = ({ navigation }) => {
             placeholderTextColor="#999"
           />
 
-          {/* Show error under input */}
-          {errorMessage ? (
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          ) : null}
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate("ForgotPassword")}
-            style={styles.forgotPasswordContainer}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={styles.forgotPasswordContainer}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.signInButton}
-            onPress={handleSignIn}
-            disabled={loading}
-          >
-            <Text style={styles.signInButtonText}>
-              {loading ? "Signing in..." : "Sign in"}
-            </Text>
+          <TouchableOpacity style={styles.signInButton} onPress={handleBeforeSignIn} disabled={loading}>
+            <Text style={styles.signInButtonText}>{loading ? "Signing in..." : "Sign in"}</Text>
           </TouchableOpacity>
 
+          {/* Divider and Google sign-in button */}
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
             <Text style={styles.orText}>or</Text>
             <View style={styles.divider} />
           </View>
-
-          <TouchableOpacity
-            style={styles.googleButton}
-            onPress={() => {
-              if (googleLoginRef?.current) {
-                googleLoginRef.current();
-              }
-            }}
-          >
-            <Image
-              source={require("../assets/google-logo.png")}
-              style={styles.googleLogo}
-            />
+          <TouchableOpacity style={styles.googleButton} onPress={() => googleLoginRef.current?.()}>
+            <Image source={require("../assets/google-logo.png")} style={styles.googleLogo} />
             <Text style={styles.googleButtonText}>Sign in with Google</Text>
           </TouchableOpacity>
-
-          <GoogleLogin
-            navigation={navigation}
-            refCallback={(callbackFn) => (googleLoginRef.current = callbackFn)}
-          />
+          <GoogleLogin navigation={navigation} refCallback={(fn) => (googleLoginRef.current = fn)} />
 
           <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-            <Text style={styles.linkText}>
-              Don’t have an account?{" "}
-              <Text style={styles.signUpText}>Sign up</Text>
-            </Text>
+            <Text style={styles.linkText}>Don’t have an account? <Text style={styles.signUpText}>Sign up</Text></Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* CAPTCHA modal overlay */}
+      <Modal visible={showCaptcha} transparent animationType="fade">
+        <View style={styles.captchaContainer}>
+          <View style={styles.captchaBox}>
+            <SliderCaptcha onSuccess={handleCaptchaSuccess} />
+            <TouchableOpacity onPress={() => setShowCaptcha(false)}>
+              <Text style={styles.closeCaptcha}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -178,7 +149,10 @@ const SignInScreen = ({ navigation }) => {
 const googleLoginRef = { current: null };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   gradientHeader: {
     height: 200,
     justifyContent: "center",
@@ -216,11 +190,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#eee",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 2,
   },
   errorText: {
     color: "red",
@@ -271,11 +240,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderWidth: 1,
     borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
   },
   googleLogo: {
     width: 22,
@@ -296,6 +260,23 @@ const styles = StyleSheet.create({
   signUpText: {
     color: "#1a73e8",
     fontWeight: "600",
+  },
+  captchaContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  captchaBox: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    width: "85%",
+  },
+  closeCaptcha: {
+    fontSize: 20,
+    color: "#333",
   },
 });
 
