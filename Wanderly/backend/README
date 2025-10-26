@@ -6,4 +6,4 @@ This file is a secret. Use it only on the backend.
 cd Wanderly
 cd Backend
 pip install -r requirements.txt
-python -m uvicorn main:app --reload --host 192.168.1.122 --port 8000
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
