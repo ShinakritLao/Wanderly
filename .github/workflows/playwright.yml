@@ -26,7 +26,7 @@ jobs:
         python-version: '3.13'
 
     - name: Install backend dependencies
-      working-directory: ./Wanderly/Backend
+      working-directory: ./Wanderly/backend
       run: pip install -r requirements.txt
 
     - name: Install frontend dependencies
@@ -42,7 +42,7 @@ jobs:
       run: npx playwright install --with-deps
 
     - name: Start backend server
-      working-directory: ./Wanderly/Backend
+      working-directory: ./Wanderly/backend
       run: |
         nohup python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
 
