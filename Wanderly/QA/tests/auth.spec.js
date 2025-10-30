@@ -1,6 +1,16 @@
 // tests/e2e/auth_valid_login.spec.js
 import { test, expect } from '@playwright/test';
 
+async function mockLogin(page) {
+  await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.setItem('authToken', 'mock-jwt-token-here');
+    localStorage.setItem('userId', 'mock-user-id');
+    localStorage.setItem('userEmail', 'shinshinakrit@gmail.com');
+    localStorage.setItem('password', '12345678');
+  });
+}
+
 test('E2E-001: User logs in with valid credentials', async ({ page }) => {
   // Step 1: Open the web app
   await page.goto('http://localhost:8081');
