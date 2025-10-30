@@ -41,6 +41,10 @@ jobs:
       working-directory: ./Wanderly/QA
       run: npx playwright install --with-deps
 
+    - name: Setup Service Account Key
+      run: echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" > ./Wanderly/backend/serviceAccountKey.json
+
+
     - name: Start backend server
       working-directory: ./Wanderly/backend
       run: |

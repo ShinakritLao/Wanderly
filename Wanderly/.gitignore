@@ -39,3 +39,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+
+.env
+serviceAccountKey.json
+main.cpython-313.pyc
+test_login.cpython-313-pytest-8.4.2.pyc
