@@ -1,27 +1,34 @@
 import React, { useEffect, useState } from "react";
-import {View, Text, TextInput, ActivityIndicator, TouchableOpacity, Image, StyleSheet} from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
-import { signUpWithEmail } from "../services/api";
-import GoogleLogin from "./GoogleLogin";
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { sendOtpForSignUp, verifyOtpSignUp } from "../services/api";
+import SliderCaptcha from "../screens/SliderCaptcha";
 
 const SignUpScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(""); // Show error
+  const [errorMessage, setErrorMessage] = useState("");
+  const [step, setStep] = useState(1); // 1 = input info, 2 = verify OTP
+  const [showCaptcha, setShowCaptcha] = useState(false);
 
   const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
 
   useEffect(() => {
+    // Auto-login if JWT exists
     const checkLogin = async () => {
       try {
         const jwt = await AsyncStorage.getItem("jwt");
@@ -38,33 +45,20 @@ const SignUpScreen = ({ navigation }) => {
     checkLogin();
   }, []);
 
-  const checkEmailExists = async (email) => {
-    try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("email")
-        .eq("email", email)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        console.error("Supabase check error:", error);
-        throw error;
-      }
-
-      return !!data;
-    } catch (err) {
-      console.error("Error checking email:", err);
-      throw err;
-    }
-  };
-
-  const handleSignUp = async () => {
-    setErrorMessage(""); 
-
+  // Validate input and show CAPTCHA before sending OTP
+  const handleSignUpPress = () => {
+    setErrorMessage("");
     if (!name || !email || !password) {
       setErrorMessage("Please fill in all fields.");
       return;
     }
+    setShowCaptcha(true);
+  };
+
+  // After CAPTCHA success, validate fields and send OTP
+  const handleCaptchaSuccess = async () => {
+    setShowCaptcha(false);
+    setErrorMessage("");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -82,38 +76,48 @@ const SignUpScreen = ({ navigation }) => {
       setErrorMessage("Password must be at least 8 characters long.");
       return;
     }
-
     if (password.length > 72) {
       setErrorMessage("Password too long. Use fewer than 72 characters.");
       return;
     }
 
     setLoading(true);
-
     try {
-      const exists = await checkEmailExists(email);
-      if (exists) {
-        setErrorMessage("This email is already registered. Please sign in.");
-        setLoading(false);
-        return;
-      }
-
-      const data = await signUpWithEmail(email, password, name);
-      if (!data || !data.access_token) {
-        setErrorMessage("Failed to sign up. Please try again.");
-        return;
-      }
-
-      await AsyncStorage.setItem("jwt", data.access_token);
-      navigation.replace("Dashboard");
+      await sendOtpForSignUp(email);
+      setStep(2);
     } catch (err) {
       console.error("Sign Up Error:", err);
-      setErrorMessage("Sign up failed. Please try again.");
+      setErrorMessage("Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Verify OTP and finish registration
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setErrorMessage("Please enter the OTP sent to your email.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await verifyOtpSignUp(email, otp, password, name);
+      if (data?.access_token) {
+        await AsyncStorage.setItem("jwt", data.access_token);
+        navigation.replace("Dashboard");
+      } else {
+        setErrorMessage("Sign-up failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("OTP Verification Error:", err);
+      setErrorMessage(err.message || "Invalid OTP or failed to verify. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Show loading spinner while checking login or loading fonts
   if (checking || !fontsLoaded) {
     return (
       <View style={styles.container}>
@@ -124,6 +128,7 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Header with logo and gradient background */}
       <LinearGradient
         colors={["#13A1E1", "#135497", "#1B1462"]}
         style={styles.gradientHeader}
@@ -134,104 +139,124 @@ const SignUpScreen = ({ navigation }) => {
         />
       </LinearGradient>
 
+      {/* Sign-up and OTP form */}
       <View style={styles.formWrapper}>
         <View style={styles.formContainer}>
-          <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>
-            Get Started
-          </Text>
+          {step === 1 ? (
+            <>
+              <Text
+                style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}
+              >
+                Get Started
+              </Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Full Name"
-            value={name}
-            onChangeText={setName}
-            placeholderTextColor="#999"
-          />
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                value={name}
+                onChangeText={setName}
+                placeholderTextColor="#999"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholderTextColor="#999"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholderTextColor="#999"
+              />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholderTextColor="#999"
-          />
+              {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#999"
-          />
+              <TouchableOpacity
+                style={styles.signUpButton}
+                onPress={handleSignUpPress}
+                disabled={loading}
+              >
+                <Text style={styles.signUpButtonText}>
+                  {loading ? "Sending OTP..." : "Sign up"}
+                </Text>
+              </TouchableOpacity>
 
-          {/* Show error under input */}
-          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+              <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+                <Text style={styles.linkText}>
+                  Have an account? <Text style={styles.signUpText}>Sign in</Text>
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text
+                style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}
+              >
+                Verify OTP
+              </Text>
+              <Text style={{ textAlign: "center", marginBottom: 20 }}>
+                Enter the OTP sent to your email: {email}
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="OTP"
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="numeric"
+                placeholderTextColor="#999"
+              />
+              {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
-          <TouchableOpacity
-            style={styles.signUpButton}
-            onPress={handleSignUp}
-            disabled={loading}
-          >
-            <Text style={styles.signUpButtonText}>
-              {loading ? "Creating..." : "Sign up"}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.orText}>or</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <TouchableOpacity
-            style={styles.googleButton}
-            onPress={() => {
-              if (googleLoginRef?.current) {
-                googleLoginRef.current();
-              }
-            }}
-          >
-            <Image
-              source={require("../assets/google-logo.png")}
-              style={styles.googleLogo}
-            />
-            <Text style={styles.googleButtonText}>Sign in with Google</Text>
-          </TouchableOpacity>
-
-          <GoogleLogin
-            navigation={navigation}
-            refCallback={(callbackFn) => (googleLoginRef.current = callbackFn)}
-          />
-
-          <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
-            <Text style={styles.linkText}>
-              Already have an account?{" "}
-              <Text style={styles.signInText}>Sign in</Text>
-            </Text>
-          </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.signUpButton}
+                onPress={handleVerifyOtp}
+                disabled={loading}
+              >
+                <Text style={styles.signUpButtonText}>
+                  {loading ? "Verifying..." : "Verify OTP"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
+
+      {/* CAPTCHA popup */}
+      {showCaptcha && (
+        <View style={styles.captchaOverlay}>
+          <View style={styles.captchaContainer}>
+            <SliderCaptcha onSuccess={handleCaptchaSuccess} />
+            <TouchableOpacity onPress={() => setShowCaptcha(false)}>
+              <Text style={styles.closeCaptcha}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
 
-const googleLoginRef = { current: null };
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  gradientHeader: {
-    height: 200,
-    justifyContent: "center",
-    alignItems: "center",
+  container: { 
+    flex: 1, 
+    backgroundColor: "#fff" 
   },
-  logoImage: {
-    width: 120,
-    height: 120,
-    marginTop: 60,
-    marginBottom: 20,
+  gradientHeader: { 
+    height: 200, 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+  logoImage: { 
+    width: 120, 
+    height: 120, 
+    marginTop: 60, 
+    marginBottom: 20 
   },
   formWrapper: {
     flex: 1,
@@ -240,97 +265,72 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
-  formContainer: {
-    padding: 20,
-    marginTop: 20,
+  formContainer: { 
+    padding: 20, 
+    marginTop: 20 
   },
-  formTitle: {
-    fontSize: 30,
-    color: "#135497",
-    textAlign: "center",
-    marginBottom: 25,
-    letterSpacing: 0.5,
+  formTitle: { 
+    fontSize: 30, 
+    color: "#135497", 
+    textAlign: "center", 
+    marginBottom: 25, 
+    letterSpacing: 0.5 
   },
-  input: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#eee",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 2,
+  input: { 
+    backgroundColor: "#f5f5f5", 
+    borderRadius: 12, 
+    padding: 15, 
+    marginBottom: 16, 
+    fontSize: 16, 
+    borderWidth: 1, 
+    borderColor: "#eee" 
   },
-  errorText: {
-    color: "red",
-    marginBottom: 10,
-    fontSize: 14,
+  errorText: { 
+    color: "red", 
+    marginBottom: 10, 
+    fontSize: 14 
   },
-  signUpButton: {
-    backgroundColor: "#1a73e8",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 10,
+  signUpButton: { 
+    backgroundColor: "#1a73e8", 
+    borderRadius: 12, 
+    padding: 16, 
+    alignItems: "center", 
+    marginTop: 10 
   },
-  signUpButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  signUpButtonText: { 
+    color: "#fff", 
+    fontSize: 16, 
+    fontWeight: "600" 
   },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 30,
+  linkText: { 
+    textAlign: "center", 
+    marginTop: 20, 
+    fontSize: 14, 
+    color: "#666" 
   },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ddd",
+  signUpText: { 
+    color: "#1a73e8", 
+    fontWeight: "600" 
   },
-  orText: {
-    color: "#666",
-    paddingHorizontal: 10,
-    fontSize: 14,
+  captchaOverlay: { 
+    position: "absolute", 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    backgroundColor: "rgba(0,0,0,0.5)" 
   },
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
+  captchaContainer: { 
+    backgroundColor: "#fff", 
+    borderRadius: 20, 
+    width: "85%", 
+    alignItems: "center" 
   },
-  googleLogo: {
-    width: 22,
-    height: 22,
-    marginRight: 10,
-  },
-  googleButtonText: {
-    fontSize: 15,
-    color: "#444",
-    fontWeight: "500",
-  },
-  linkText: {
-    textAlign: "center",
-    marginTop: 20,
-    fontSize: 14,
-    color: "#666",
-  },
-  signInText: {
-    color: "#1a73e8",
-    fontWeight: "600",
+  closeCaptcha: {
+    fontSize: 20,
+    color: "#333",
   },
 });
 
