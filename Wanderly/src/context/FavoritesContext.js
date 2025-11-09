@@ -42,11 +42,28 @@ export const FavoritesProvider = ({ children }) => {
     );
   };
 
+  // Add a new place
+  const addPlace = ({ name, location, image }) => {
+    const newPlace = {
+      id: Date.now().toString(),
+      name: name || 'Untitled Place',
+      location: location || '',
+      image: image || 'https://via.placeholder.com/800',
+      rating: 0,
+      category: [],
+      price: [],
+      environment: [],
+      favorite: 0,
+    };
+    setPlaces(prevPlaces => [newPlace, ...prevPlaces]);
+  };
+
   const value = {
     places,
     toggleFavorite,
     getFavorites,
     removeFavorite,
+    addPlace,
   };
 
   return (

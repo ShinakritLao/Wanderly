@@ -5,6 +5,7 @@ import Favorites from '../screens/Favorites';
 import Tinder from '../screens/Tinder';
 import Folder from '../screens/Folder';
 import Profile from '../screens/Profile';
+import NewPlace from '../screens/NewPlace';
 import BottomTabBar from '../components/BottomTabBar';
 
 const Tab = createBottomTabNavigator();
@@ -37,6 +38,13 @@ const AppNavigator = () => {
         component={Tinder}
         options={{
           tabBarLabel: 'Tinder',
+        }}
+      />
+      <Tab.Screen
+        name="NewPlace"
+        component={NewPlace}
+        options={{
+          tabBarLabel: 'NewPlace',
         }}
       />
       <Tab.Screen
