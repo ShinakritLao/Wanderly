@@ -42,7 +42,7 @@ export default function GoogleLogin({ navigation, refCallback }) {
           const data = await signInWithGoogle(firebaseToken);
           await AsyncStorage.setItem("jwt", data.access_token);
 
-          navigation.replace("Dashboard");
+          navigation.replace("MainTabs");
         } catch (err) {
           console.error("Google login error:", err);
           Alert.alert("Login failed", "Could not log in with Google.");

@@ -17,6 +17,7 @@ import Tinder from '../screens/Tinder';
 import Folder from '../screens/Folder';
 import Profile from '../screens/Profile';
 import BottomTabBar from '../components/BottomTabBar';
+import NewPlace from '../screens/NewPlace';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,6 +51,13 @@ function MainTabNavigator() {
         component={Tinder}
         options={{
           tabBarLabel: 'Tinder',
+        }}
+      />
+      <Tab.Screen
+        name="NewPlace"
+        component={NewPlace}
+        options={{
+          tabBarLabel: 'NewPlace',
         }}
       />
       <Tab.Screen

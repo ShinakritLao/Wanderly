@@ -13,6 +13,8 @@ const BottomTabBar = ({ state, descriptors, navigation }) => {
         return 'plus';
       case 'Folder':
         return 'folder';
+      case 'NewPlace':
+        return 'flag';
       case 'Profile':
         return 'user';
       default:

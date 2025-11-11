@@ -42,11 +42,25 @@ export const FavoritesProvider = ({ children }) => {
     );
   };
 
+  // Add new place
+  const addPlace = (newPlaceData) => {
+    const newPlace = {
+      id: Math.max(...places.map(p => p.id), 0) + 1,
+      name: newPlaceData.name,
+      location: newPlaceData.location,
+      image: newPlaceData.image || 'https://via.placeholder.com/400x300?text=No+Image',
+      description: newPlaceData.description,
+      favorite: 1, // Add as favorite by default
+    };
+    setPlaces(prevPlaces => [newPlace, ...prevPlaces]);
+  };
+
   const value = {
     places,
     toggleFavorite,
     getFavorites,
     removeFavorite,
+    addPlace,
   };
 
   return (
