@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+firebase-admin
+python-dotenv
+python-jose[cryptography]
+supabase
+python-multipart
+passlib[bcrypt]
+pydantic[email]
+fastapi-mail
+requests
+bcrypt==3.2.2

@@ -1,0 +1,540 @@
+// Mock data for reviews and recommended places
+
+export const mockReviews = [
+  {
+    id: '1',
+    placeName: 'Byodo-In Temple',
+    image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&q=80',
+    userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+    rating: 5,
+    reviewCount: 234,
+    snippet: "Don't miss the koi pond in this absolutely stunning temple in a beautiful location."
+  },
+  {
+    id: '2',
+    placeName: 'Golden Gate Bridge',
+    image: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&q=80',
+    userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+    rating: 4,
+    reviewCount: 1567,
+    snippet: "Iconic bridge with stunning views, especially at sunset. Must visit when in San Francisco."
+  },
+  {
+    id: '3',
+    placeName: 'Santorini Sunset',
+    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&q=80',
+    userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
+    rating: 5,
+    reviewCount: 892,
+    snippet: "The most beautiful sunset I've ever seen. The white buildings against the blue sea are magical."
+  }
+];
+
+export const mockPlaces = [
+  {
+    id: '1',
+    name: 'Mount Fuji',
+    location: 'Tokyo, Japan',
+    image: 'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?w=800&q=80',
+    rating: 4.8,
+    category: ['Nature', 'Adventure'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '2',
+    name: 'Santorini',
+    location: 'Cyclades, Greece',
+    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&q=80',
+    rating: 4.9,
+    category: ['Relaxation', 'Culture'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '3',
+    name: 'Machu Picchu',
+    location: 'Cusco, Peru',
+    image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800&q=80',
+    rating: 4.7,
+    category: ['Adventure', 'Culture', 'Nature'],
+    price: ['Mid-range', 'Budget'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '4',
+    name: 'Northern Lights',
+    location: 'Iceland',
+    image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80',
+    rating: 4.9,
+    category: ['Nature', 'Adventure'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '5',
+    name: 'Bali Temple',
+    location: 'Bali, Indonesia',
+    image: 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=800&q=80',
+    rating: 4.6,
+    category: ['Culture', 'Relaxation'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '6',
+    name: 'Swiss Alps',
+    location: 'Zurich, Switzerland',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    rating: 4.8,
+    category: ['Nature', 'Adventure', 'Relaxation'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '7',
+    name: 'Great Wall',
+    location: 'Beijing, China',
+    image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80',
+    rating: 4.5,
+    category: ['Culture', 'Adventure'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '8',
+    name: 'Maldives Resort',
+    location: 'Maldives',
+    image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
+    rating: 4.9,
+    category: ['Relaxation', 'Nature'],
+    price: ['Luxury'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '9',
+    name: 'Petra',
+    location: 'Jordan',
+    image: 'https://images.unsplash.com/photo-1539650116574-75c0c6d73c6e?w=800&q=80',
+    rating: 4.7,
+    category: ['Culture', 'Adventure'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '10',
+    name: 'Amazon Rainforest',
+    location: 'Brazil',
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+    rating: 4.6,
+    category: ['Adventure', 'Nature'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '11',
+    name: 'Taj Mahal',
+    location: 'Agra, India',
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture'],
+    price: ['Budget'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '12',
+    name: 'Banff National Park',
+    location: 'Alberta, Canada',
+    image: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=800&q=80',
+    rating: 4.7,
+    category: ['Nature', 'Adventure'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '13',
+    name: 'Tokyo Tower',
+    location: 'Tokyo, Japan',
+    image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80',
+    rating: 4.6,
+    category: ['Culture', 'City'],
+    price: ['Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '14',
+    name: 'Dubai Marina',
+    location: 'Dubai, UAE',
+    image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80',
+    rating: 4.7,
+    category: ['Relaxation', 'Luxury', 'City'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '15',
+    name: 'Niagara Falls',
+    location: 'Ontario, Canada',
+    image: 'https://images.unsplash.com/photo-1489447068241-b3490214e879?w=800&q=80',
+    rating: 4.8,
+    category: ['Nature', 'Adventure'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '16',
+    name: 'Eiffel Tower',
+    location: 'Paris, France',
+    image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=800&q=80',
+    rating: 4.9,
+    category: ['Culture', 'City', 'Romantic'],
+    price: ['Mid-range', 'Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '17',
+    name: 'Grand Canyon',
+    location: 'Arizona, USA',
+    image: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?w=800&q=80',
+    rating: 4.8,
+    category: ['Nature', 'Adventure'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '18',
+    name: 'Colosseum',
+    location: 'Rome, Italy',
+    image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80',
+    rating: 4.7,
+    category: ['Culture', 'History'],
+    price: ['Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '19',
+    name: 'Bora Bora',
+    location: 'French Polynesia',
+    image: 'https://images.unsplash.com/photo-1589197331516-7c2b62d0ce29?w=800&q=80',
+    rating: 4.9,
+    category: ['Relaxation', 'Romantic', 'Nature'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '20',
+    name: 'Angkor Wat',
+    location: 'Siem Reap, Cambodia',
+    image: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'History', 'Adventure'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '21',
+    name: 'Statue of Liberty',
+    location: 'New York, USA',
+    image: 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=800&q=80',
+    rating: 4.6,
+    category: ['Culture', 'History', 'City'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '22',
+    name: 'Victoria Falls',
+    location: 'Zambia/Zimbabwe',
+    image: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&q=80',
+    rating: 4.9,
+    category: ['Nature', 'Adventure'],
+    price: ['Mid-range', 'Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '23',
+    name: 'Sagrada Familia',
+    location: 'Barcelona, Spain',
+    image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'Architecture', 'City'],
+    price: ['Mid-range'],
+    environment: ['Indoor'],
+    favorite: 0
+  },
+  {
+    id: '24',
+    name: 'Yellowstone',
+    location: 'Wyoming, USA',
+    image: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?w=800&q=80',
+    rating: 4.7,
+    category: ['Nature', 'Adventure', 'Wildlife'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '25',
+    name: 'Plitvice Lakes',
+    location: 'Croatia',
+    image: 'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
+    rating: 4.8,
+    category: ['Nature', 'Adventure'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '26',
+    name: 'Hagia Sophia',
+    location: 'Istanbul, Turkey',
+    image: 'https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80',
+    rating: 4.7,
+    category: ['Culture', 'History', 'Architecture'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Indoor'],
+    favorite: 0
+  },
+  {
+    id: '27',
+    name: 'Cinque Terre',
+    location: 'Italy',
+    image: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'Relaxation', 'Romantic'],
+    price: ['Mid-range', 'Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '28',
+    name: 'Burj Khalifa',
+    location: 'Dubai, UAE',
+    image: 'https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=800&q=80',
+    rating: 4.7,
+    category: ['City', 'Architecture', 'Luxury'],
+    price: ['Luxury'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '29',
+    name: 'Patagonia',
+    location: 'Argentina/Chile',
+    image: 'https://images.unsplash.com/photo-1555992336-fb0d29621f1a?w=800&q=80',
+    rating: 4.9,
+    category: ['Nature', 'Adventure', 'Wildlife'],
+    price: ['Mid-range', 'Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '30',
+    name: 'Neuschwanstein Castle',
+    location: 'Bavaria, Germany',
+    image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'History', 'Architecture'],
+    price: ['Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '31',
+    name: 'Ha Long Bay',
+    location: 'Vietnam',
+    image: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80',
+    rating: 4.7,
+    category: ['Nature', 'Adventure', 'Relaxation'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '32',
+    name: 'Acropolis',
+    location: 'Athens, Greece',
+    image: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=800&q=80',
+    rating: 4.6,
+    category: ['Culture', 'History'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '33',
+    name: 'Serengeti',
+    location: 'Tanzania',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80',
+    rating: 4.9,
+    category: ['Nature', 'Adventure', 'Wildlife'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '34',
+    name: 'Blue Lagoon',
+    location: 'Iceland',
+    image: 'https://images.unsplash.com/photo-1551639747-9d91c84dc6e2?w=800&q=80',
+    rating: 4.7,
+    category: ['Relaxation', 'Nature'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '35',
+    name: 'Forbidden City',
+    location: 'Beijing, China',
+    image: 'https://images.unsplash.com/photo-1580983375244-0b5e41af8ce4?w=800&q=80',
+    rating: 4.6,
+    category: ['Culture', 'History'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '36',
+    name: 'Amalfi Coast',
+    location: 'Italy',
+    image: 'https://images.unsplash.com/photo-1534113414509-0bd0019d78d7?w=800&q=80',
+    rating: 4.9,
+    category: ['Relaxation', 'Romantic', 'Culture'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '37',
+    name: 'Moai Statues',
+    location: 'Easter Island, Chile',
+    image: 'https://images.unsplash.com/photo-1531065208531-4036c0dba3ca?w=800&q=80',
+    rating: 4.7,
+    category: ['Culture', 'History', 'Adventure'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '38',
+    name: 'Zhangjiajie',
+    location: 'Hunan, China',
+    image: 'https://images.unsplash.com/photo-1580928662779-5ccf0e7deef7?w=800&q=80',
+    rating: 4.8,
+    category: ['Nature', 'Adventure'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '39',
+    name: 'Mont Saint-Michel',
+    location: 'Normandy, France',
+    image: 'https://images.unsplash.com/photo-1572898245497-1e3e0b639963?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'History', 'Architecture'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '40',
+    name: 'Cappadocia',
+    location: 'Turkey',
+    image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&q=80',
+    rating: 4.9,
+    category: ['Adventure', 'Culture', 'Nature'],
+    price: ['Mid-range', 'Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '41',
+    name: 'Stonehenge',
+    location: 'Wiltshire, England',
+    image: 'https://images.unsplash.com/photo-1599833975787-5d9af90f8a4d?w=800&q=80',
+    rating: 4.5,
+    category: ['Culture', 'History'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '42',
+    name: 'Galápagos Islands',
+    location: 'Ecuador',
+    image: 'https://images.unsplash.com/photo-1569950234731-b7c0b0d0c0c3?w=800&q=80',
+    rating: 4.9,
+    category: ['Nature', 'Wildlife', 'Adventure'],
+    price: ['Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '43',
+    name: 'Alhambra',
+    location: 'Granada, Spain',
+    image: 'https://images.unsplash.com/photo-1551431009-a802eeec77b1?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'History', 'Architecture'],
+    price: ['Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '44',
+    name: 'Fiordland',
+    location: 'New Zealand',
+    image: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800&q=80',
+    rating: 4.9,
+    category: ['Nature', 'Adventure'],
+    price: ['Mid-range', 'Luxury'],
+    environment: ['Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '45',
+    name: 'Kyoto Temples',
+    location: 'Kyoto, Japan',
+    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80',
+    rating: 4.8,
+    category: ['Culture', 'History', 'Relaxation'],
+    price: ['Budget', 'Mid-range'],
+    environment: ['Indoor', 'Outdoor'],
+    favorite: 0
+  },
+  {
+    id: '46',
+    name: 'Antelope Canyon',
+    location: 'Arizona, USA',
+    image: 'https://images.unsplash.com/photo-1444076784383-69ff7bae1b0a?w=800&q=80',
+    rating: 4.7,
+    category: ['Nature', 'Adventure', 'Photography'],
+    price: ['Mid-range'],
+    environment: ['Outdoor'],
+    favorite: 0
+  }
+];
