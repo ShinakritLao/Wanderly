@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 import random
@@ -50,7 +51,12 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
-SERVICE_ACCOUNT_PATH = os.getenv("SERVICE_ACCOUNT_PATH", "serviceAccountKey.json")
+# SERVICE_ACCOUNT_PATH = os.getenv("SERVICE_ACCOUNT_PATH", "serviceAccountKey.json")
+service_account_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+if service_account_json:
+    service_account_info = json.loads(service_account_json)
+else:
+    raise Exception("Service account JSON not found")
 
 # Mail configuration
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
@@ -76,7 +82,9 @@ fm = FastMail(conf)
 
 # Initialize Supabase and Firebase
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+# cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+# firebase_admin.initialize_app(cred)
+cred = credentials.Certificate(service_account_info)
 firebase_admin.initialize_app(cred)
 
 # Password hashing
