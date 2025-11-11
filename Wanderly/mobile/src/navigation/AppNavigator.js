@@ -17,6 +17,7 @@ import Tinder from '../screens/Tinder';
 import Folder from '../screens/Folder';
 import Profile from '../screens/Profile';
 import BottomTabBar from '../components/BottomTabBar';
+import CreateFolder from '../screens/CreateFolder'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,6 +93,7 @@ export default function AppNavigator() {
       
       {/* Main tab navigator (replaces or supplements Dashboard) */}
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+      <Stack.Screen name="CreateFolder" component={CreateFolder} />
     </Stack.Navigator>
   );
 }
