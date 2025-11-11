@@ -40,7 +40,8 @@
     },
     "web": {
       "favicon": "./assets/favicon1.png",
-      "bundler": "webpack"
+      "bundler": "webpack",
+      "output": "static"
     }
   }
 }
