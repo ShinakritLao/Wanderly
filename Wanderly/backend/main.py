@@ -34,14 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Backend running!"}
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
 # Load environment variables
 load_dotenv()
 
@@ -128,6 +120,14 @@ def verify_password(plain_password, hashed_password):
 # Temporary storages
 otp_storage = {}
 slider_captcha_storage = {}
+
+@app.get("/")
+def read_root():
+    return {"message": "Backend running!"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 # =====================================================
 #                    GOOGLE LOGIN
