@@ -39,7 +39,9 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon1.png"
+      "favicon": "./assets/favicon1.png",
+      "bundler": "metro",
+      "output": "static"
     }
   }
 }
