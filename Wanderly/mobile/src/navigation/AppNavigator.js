@@ -18,6 +18,9 @@ import Folder from '../screens/Folder';
 import Profile from '../screens/Profile';
 import BottomTabBar from '../components/BottomTabBar';
 import NewPlace from '../screens/NewPlace';
+import CreateFolder from '../screens/CreateFolder'
+import FolderDetail from '../screens/FolderDetails'
+import Voting from '../screens/Voting'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -100,6 +103,15 @@ export default function AppNavigator() {
       
       {/* Main tab navigator (replaces or supplements Dashboard) */}
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+      
+      {/* Hidden additional screen */}
+      <Stack.Screen name="CreateFolder" component={CreateFolder} />
+      <Stack.Screen name="FolderDetail" component={FolderDetail} />
+      <Stack.Screen
+        name="Voting"
+        component={Voting}
+        options={{ path: "vote/:folderId" }}
+      />
     </Stack.Navigator>
   );
 }

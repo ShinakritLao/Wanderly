@@ -30,4 +30,6 @@ npx expo install @react-native-community/slider
 expo install react-native-vector-icons
 yarn add react-native-worklets@0.5.0
 npx expo install react-native-worklets-core
+npm install @react-native-community/datetimepicker
+npm install @react-native-clipboard/clipboard
 npm start -c
