@@ -24,4 +24,10 @@ npm install react-native-web
 npm install react-google-recaptcha-v3
 npm install @react-native-community/slider
 npm install rc-slider
+npx expo install @react-navigation/native @react-navigation/bottom-tabs
+npx expo install react-native-vector-icons
+npx expo install @react-native-community/slider
+expo install react-native-vector-icons
+yarn add react-native-worklets@0.5.0
+npx expo install react-native-worklets-core
 npm start -c

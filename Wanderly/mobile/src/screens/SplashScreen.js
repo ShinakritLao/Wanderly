@@ -24,7 +24,7 @@ export default function SplashScreen({ navigation }) {
         setTimeout(() => {
           startAnimation(() => {
             if (jwt) {
-              navigation.replace("Dashboard"); // Navigate to dashboard if logged in
+              navigation.replace("MainTabs"); // Navigate to Home if logged in
             } else {
               navigation.replace("SignIn");   // Otherwise, go to sign-in
             }
