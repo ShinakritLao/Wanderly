@@ -40,16 +40,38 @@ const Folder = () => {
     navigation.navigate('CreateFolder');
   };
 
+  const handleDelete = async (folderId) => {
+    try {
+      const updatedFolders = folders.filter(f => f.id !== folderId);
+      await AsyncStorage.setItem('folders', JSON.stringify(updatedFolders));
+      setFolders(updatedFolders);
+    } catch (err) {
+      console.error('Failed to delete folder:', err);
+    }
+  };
+
   const renderFolder = ({ item }) => (
     <View style={styles.folderCard}>
-      <View style={styles.folderHeader}>
-        <Text style={styles.folderTitle}>{item.name}</Text>
-      </View>
-      <View style={styles.folderImages}>
-        {item.places.slice(0, 3).map((place, idx) => (
-          <Image key={idx} source={{ uri: place.image }} style={styles.previewImage} />
-        ))}
-      </View>
+      <TouchableOpacity
+        style={{ flex: 1 }}
+        onPress={() => navigation.navigate('FolderDetail', { folderId: item.id })}
+      >
+        <View style={styles.folderHeader}>
+          <Text style={styles.folderTitle}>{item.name}</Text>
+        </View>
+        <View style={styles.folderImages}>
+          {item.places.slice(0, 3).map((place, idx) => (
+            <Image key={idx} source={{ uri: place.image }} style={styles.previewImage} />
+          ))}
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDelete(item.id)}
+      >
+        <Feather name="trash-2" size={20} color="#FFF" />
+      </TouchableOpacity>
     </View>
   );
 
@@ -105,11 +127,20 @@ const styles = StyleSheet.create({
     borderColor: '#1565C0',
     padding: 16,
     marginBottom: 20,
+    position: 'relative',
   },
   folderHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   folderTitle: { fontSize: 18, fontWeight: '700', color: '#1B1462' },
   folderImages: { flexDirection: 'row', marginTop: 10 },
   previewImage: { width: 80, height: 80, borderRadius: 40, marginRight: 10 },
+  deleteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#E53935',
+    borderRadius: 20,
+    padding: 6,
+  },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 80 },
   emptyText: { fontSize: 16, color: '#999', marginTop: 10 },
   createButton: {
@@ -122,6 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingVertical: 10,
     paddingHorizontal: 25,
+    marginBottom: 30
   },
   createText: { fontSize: 16, fontWeight: '600', color: '#1B1462', marginRight: 8 },
   plusCircle: {
