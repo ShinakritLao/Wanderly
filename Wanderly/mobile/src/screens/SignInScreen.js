@@ -24,7 +24,7 @@ const SignInScreen = ({ navigation }) => {
     const checkLogin = async () => {
       try {
         const jwt = await AsyncStorage.getItem("jwt");
-        if (jwt) navigation.replace("Dashboard");
+        if (jwt) navigation.replace("MainTabs");
       } catch (err) {
         console.error("Error reading JWT:", err);
       } finally {
@@ -59,7 +59,7 @@ const SignInScreen = ({ navigation }) => {
       const data = await signInWithEmail(email, password);
       if (!data?.access_token) return setErrorMessage("Incorrect email or password.");
       await AsyncStorage.setItem("jwt", data.access_token);
-      navigation.replace("Dashboard");
+      navigation.replace("MainTabs");
     } catch (err) {
       console.error("Sign In Error:", err);
       setErrorMessage("Incorrect email or password.");

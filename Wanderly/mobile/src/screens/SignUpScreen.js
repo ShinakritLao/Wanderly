@@ -35,7 +35,7 @@ const SignUpScreen = ({ navigation }) => {
       try {
         const jwt = await AsyncStorage.getItem("jwt");
         if (jwt) {
-          navigation.replace("Dashboard");
+          navigation.replace("MainTabs");
           return;
         }
       } catch (err) {
@@ -107,7 +107,7 @@ const SignUpScreen = ({ navigation }) => {
       const data = await verifyOtpSignUp(email, otp, password, name);
       if (data?.access_token) {
         await AsyncStorage.setItem("jwt", data.access_token);
-        navigation.replace("Dashboard");
+        navigation.replace("MainTabs");
       } else {
         setErrorMessage("Sign-up failed. Please try again.");
       }
