@@ -14,6 +14,8 @@ import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { sendOtpForSignUp, verifyOtpSignUp } from "../services/api";
 import SliderCaptcha from "../screens/SliderCaptcha";
 
+import Logo from '../assets/wanderly-logo-white.png';
+
 const SignUpScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
@@ -134,7 +136,7 @@ const SignUpScreen = ({ navigation }) => {
         style={styles.gradientHeader}
       >
         <Image
-          source={require("../assets/wanderly-logo-white.png")}
+          source={Logo}
           style={styles.logoImage}
         />
       </LinearGradient>

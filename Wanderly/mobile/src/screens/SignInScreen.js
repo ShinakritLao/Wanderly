@@ -7,6 +7,9 @@ import { signInWithEmail } from "../services/api";
 import GoogleLogin from "./GoogleLogin";
 import SliderCaptcha from "../screens/SliderCaptcha";
 
+import Logo from '../assets/wanderly-logo-white.png';
+import LogoGoog from '../assets/google-logo.png';
+
 const SignInScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -77,7 +80,7 @@ const SignInScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header with gradient background and logo */}
       <LinearGradient colors={["#13A1E1", "#135497", "#1B1462"]} style={styles.gradientHeader}>
-        <Image source={require("../assets/wanderly-logo-white.png")} style={styles.logoImage} />
+        <Image source={Logo} style={styles.logoImage} />
       </LinearGradient>
 
       {/* Sign-in form container */}
@@ -120,7 +123,7 @@ const SignInScreen = ({ navigation }) => {
             <View style={styles.divider} />
           </View>
           <TouchableOpacity style={styles.googleButton} onPress={() => googleLoginRef.current?.()}>
-            <Image source={require("../assets/google-logo.png")} style={styles.googleLogo} />
+            <Image source={LogoGoog} style={styles.googleLogo} />
             <Text style={styles.googleButtonText}>Sign in with Google</Text>
           </TouchableOpacity>
           <GoogleLogin navigation={navigation} refCallback={(fn) => (googleLoginRef.current = fn)} />

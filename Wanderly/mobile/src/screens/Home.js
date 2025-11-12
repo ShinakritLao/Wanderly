@@ -16,6 +16,8 @@ import { Feather } from '@expo/vector-icons';
 import { mockReviews } from '../data/mockData';
 import { useFavorites } from '../context/FavoritesContext';
 
+import Logo from '../assets/Wanderly-Color-Logo.png';
+
 const { width, height } = Dimensions.get('window');
 
 const Home = () => {
@@ -148,7 +150,7 @@ const Home = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.logoContainer}>
           <Image 
-            source={require('../assets/Wanderly-Color-Logo.png')} 
+            source={Logo} 
             style={styles.logo}
             resizeMode="contain"
           />

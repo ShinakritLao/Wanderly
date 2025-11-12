@@ -14,6 +14,8 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { useFavorites } from '../context/FavoritesContext';
 
+import Logo from '../assets/Wanderly-Color-Logo.png';
+
 const { width } = Dimensions.get('window');
 const SWIPE_THRESHOLD = -80;
 
@@ -150,7 +152,7 @@ const Favorites = () => {
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image
-          source={require('../assets/Wanderly-Color-Logo.png')}
+          source={Logo}
           style={styles.logo}
           resizeMode="contain"
         />

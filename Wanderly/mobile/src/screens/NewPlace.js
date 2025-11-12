@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Image, Modal } from 'react-native';
 import { useFavorites } from '../context/FavoritesContext';
 
+import Logo from '../assets/Wanderly-Color-Logo.png';
+
 const NewPlace = ({ navigation }) => {
   const { addPlace } = useFavorites();
   const [name, setName] = useState('');
@@ -37,7 +39,7 @@ const NewPlace = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.logoTop}>
         <Image
-          source={require('../assets/Wanderly-Color-Logo.png')}
+          source={Logo}
           style={styles.logo}
           resizeMode="contain"
         />

@@ -16,6 +16,8 @@ import Slider from '@react-native-community/slider';
 import { Feather } from '@expo/vector-icons';
 import { useFavorites } from '../context/FavoritesContext';
 
+import Logo from '../assets/Wanderly-Color-Logo.png';
+
 const { width, height } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
 
@@ -344,7 +346,7 @@ const Tinder = () => {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Image 
-            source={require('../assets/Wanderly-Color-Logo.png')} 
+            source={Logo} 
             style={styles.logo}
             resizeMode="contain"
           />

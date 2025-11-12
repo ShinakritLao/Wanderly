@@ -3,6 +3,8 @@ import { View, StyleSheet, Image, ActivityIndicator, Animated } from "react-nati
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
 
+import Logo from '../assets/wanderly-logo-white.png';
+
 export default function SplashScreen({ navigation }) {
   const fadeAnim = React.useRef(new Animated.Value(1)).current; // Animation value for fade-out
 
@@ -47,7 +49,7 @@ export default function SplashScreen({ navigation }) {
         <View style={styles.contentContainer}>
           {/* App logo */}
           <Image
-            source={require('../assets/wanderly-logo-white.png')}
+            source={Logo}
             style={styles.logo}
             resizeMode="contain"
           />

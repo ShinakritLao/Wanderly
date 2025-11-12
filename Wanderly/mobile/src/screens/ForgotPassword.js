@@ -5,6 +5,8 @@ import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
 import { requestOtp, verifyOtpAndResetPassword } from "../services/api";
 import SliderCaptcha from "../screens/SliderCaptcha"; 
 
+import Logo from '../assets/wanderly-logo-white.png';
+
 export default function ForgotPasswordScreen({ navigation }) {
   const [step, setStep] = useState(1); // 1 = request OTP, 2 = verify and reset password
   const [email, setEmail] = useState("");
@@ -76,7 +78,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header section with gradient and logo */}
       <LinearGradient colors={["#13A1E1", "#135497", "#1B1462"]} style={styles.gradientHeader}>
-        <Image source={require("../assets/wanderly-logo-white.png")} style={styles.logoImage} />
+        <Image source={Logo} style={styles.logoImage} />
       </LinearGradient>
 
       {/* Main form section */}
