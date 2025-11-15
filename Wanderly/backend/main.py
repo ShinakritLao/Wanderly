@@ -125,6 +125,14 @@ def verify_password(plain_password, hashed_password):
 otp_storage = {}
 slider_captcha_storage = {}
 
+@app.get("/")
+def read_root():
+    return {"message": "Backend running!"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 # =====================================================
 #                    GOOGLE LOGIN
 # =====================================================
