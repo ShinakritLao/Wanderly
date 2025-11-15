@@ -51,6 +51,8 @@ export const FavoritesProvider = ({ children }) => {
       image: newPlaceData.image || 'https://via.placeholder.com/400x300?text=No+Image',
       description: newPlaceData.description,
       favorite: 1, // Add as favorite by default
+      // New field: whether the place is verified by admin (boolean)
+      verified: typeof newPlaceData.verified === 'boolean' ? newPlaceData.verified : false,
     };
     setPlaces(prevPlaces => [newPlace, ...prevPlaces]);
   };

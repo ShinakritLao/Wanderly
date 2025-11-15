@@ -1,36 +1,72 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Image, Modal } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useFavorites } from '../context/FavoritesContext';
 
 const NewPlace = ({ navigation }) => {
   const { addPlace } = useFavorites();
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState(null);
   const [description, setDescription] = useState('');
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
-  const onSubmit = () => {
+  // Pick image from device
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const validateAndSubmit = () => {
     if (!name.trim()) {
-      Alert.alert('Validation', 'Please enter a name for the place.');
+      Alert.alert('Missing field', 'Please enter the name of the place.');
       return;
     }
-    // Show approval modal instead of saving directly
+    if (!location.trim()) {
+      Alert.alert('Missing field', 'Please enter the location.');
+      return;
+    }
+    if (!description.trim()) {
+      Alert.alert('Missing field', 'Please enter the description.');
+      return;
+    }
+    if (!image) {
+      Alert.alert('Missing picture', 'Please select an image for the place.');
+      return;
+    }
     setShowApprovalModal(true);
   };
 
   const handleApproval = (approved) => {
     setShowApprovalModal(false);
-    
-    if (approved) {
-      addPlace({ 
-        name: name.trim(), 
-        location: location.trim(), 
-        image: image.trim(),
-        description: description.trim()
-      });
-      navigation.navigate('Home');
+    if (!approved) {
+      setTimeout(() => {
+        Alert.alert('Denied', 'You have been denied.');
+      }, 100);
+      return;
     }
+    // Add the place and navigate only if approved
+    addPlace({
+      name: name.trim(),
+      location: location.trim(),
+      image: image || 'https://via.placeholder.com/400x300?text=No+Image',
+      description: description.trim(),
+      verified: true,
+    });
+    // Clear form fields
+    setName('');
+    setLocation('');
+    setImage(null);
+    setDescription('');
+    navigation.navigate('Home');
   };
 
   return (
@@ -66,13 +102,27 @@ const NewPlace = ({ navigation }) => {
           onChangeText={setLocation}
         />
 
-        <Text style={styles.label}>Image URL (optional)</Text>
-        <TextInput
-          placeholder="https://..."
-          style={styles.input}
-          value={image}
-          onChangeText={setImage}
-        />
+        <Text style={styles.label}>Picture</Text>
+        <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+          <Text style={styles.imagePickerText}>
+            {image ? '✓ Image Selected' : '+ Pick Image from Device'}
+          </Text>
+        </TouchableOpacity>
+        {image && (
+          <View style={styles.imagePreviewContainer}>
+            <Image 
+              source={{ uri: image }} 
+              style={styles.imagePreview}
+              resizeMode="cover"
+            />
+            <TouchableOpacity 
+              style={styles.removeImageButton} 
+              onPress={() => setImage(null)}
+            >
+              <Text style={styles.removeImageText}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <Text style={styles.label}>Description</Text>
         <TextInput
@@ -85,7 +135,7 @@ const NewPlace = ({ navigation }) => {
           textAlignVertical="top"
         />
 
-        <TouchableOpacity style={styles.button} onPress={onSubmit}>
+          <TouchableOpacity style={styles.button} onPress={validateAndSubmit}>
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
         </ScrollView>
@@ -134,6 +184,42 @@ const styles = StyleSheet.create({
   descriptionInput: {
     height: 100,
     paddingTop: 12,
+    textAlignVertical: 'top',
+  },
+  imagePickerButton: {
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    backgroundColor: '#F0F8FF',
+  },
+  imagePickerText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  imagePreviewContainer: {
+    marginTop: 12,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+  removeImageButton: {
+    backgroundColor: '#F44336',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
