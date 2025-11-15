@@ -7,13 +7,17 @@
     "orientation": "portrait",
     "icon": "./assets/icon1.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon1.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "bundleIdentifier": "com.wanderly.app",
       "supportsTablet": true
@@ -24,22 +28,15 @@
         "foregroundImage": "./assets/adaptive-icon1.png",
         "backgroundColor": "#ffffff"
       },
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "wanderly",
-              "host": "*"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
+      "intentFilters": []
     },
     "web": {
       "favicon": "./assets/favicon1.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e7a21459-8eae-4cf6-8020-fb68bd2b2345"
+      }
     }
   }
 }
