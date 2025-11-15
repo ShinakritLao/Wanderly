@@ -36,4 +36,5 @@ npx expo install react-native-worklets-core
 npm install @react-native-community/datetimepicker
 npm install @react-native-clipboard/clipboard
 npm dedupe
+npx expo install expo-build-properties
 npm start -c
