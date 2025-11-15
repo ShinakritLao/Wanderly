@@ -345,7 +345,8 @@ def generate_text_box_image(width=300, height=150, text_length=8):
     draw = ImageDraw.Draw(img)
 
     try:
-        font = ImageFont.truetype("arial.ttf", 200)
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
+
     except:
         font = ImageFont.load_default()
 
