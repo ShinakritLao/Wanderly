@@ -4,9 +4,10 @@ This file is a secret. Use it only on the environment.
 Before run check the EXPO_PUBLIC_API_URL first.
 
 
-
 cd Wanderly
+cd mobile
 npm install -g expo-cli
+npm install -g eas-cli
 npm install @react-navigation/native @react-navigation/stack
 npm install react-native-linear-gradient
 npm install @expo-google-fonts/poppins expo-font
@@ -18,12 +19,12 @@ npm install react-native-reanimated
 npm install @react-native-masked-view/masked-view
 npm install -g firebase-tools
 npm install firebase expo-auth-session axios
-install expo-firebase-recaptcha
 npm install react@19.1.0 react-dom@19.1.0 
 npm install react-native-web
-npm install react-google-recaptcha-v3
 npm install @react-native-community/slider
 npm install rc-slider
+npm install expo-firebase-core@latest expo-firebase-analytics@latest
+npm install firebase@latest
 npx expo install @react-navigation/native @react-navigation/bottom-tabs
 npx expo install react-native-vector-icons
 npx expo install @react-native-community/slider

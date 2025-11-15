@@ -5,11 +5,11 @@
     "scheme": "wanderly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon1.png",
+    "icon": "./src/assets/icon1.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "splash": {
-      "image": "./assets/splash-icon1.png",
+      "image": "./src/assets/splash-icon1.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -25,13 +25,13 @@
     "android": {
       "package": "com.wanderly.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon1.png",
+        "foregroundImage": "./src/assets/adaptive-icon1.png",
         "backgroundColor": "#ffffff"
       },
       "intentFilters": []
     },
     "web": {
-      "favicon": "./assets/favicon1.png"
+      "favicon": "./src/assets/favicon1.png"
     },
     "extra": {
       "eas": {
