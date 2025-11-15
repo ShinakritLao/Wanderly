@@ -25,6 +25,8 @@ npm install @react-native-community/slider
 npm install rc-slider
 npm install expo-firebase-core@latest expo-firebase-analytics@latest
 npm install firebase@latest
+npm install expo@latest expo-constants@latest
+npm install expo-modules-core@latest
 npx expo install @react-navigation/native @react-navigation/bottom-tabs
 npx expo install react-native-vector-icons
 npx expo install @react-native-community/slider
@@ -33,4 +35,5 @@ yarn add react-native-worklets@0.5.0
 npx expo install react-native-worklets-core
 npm install @react-native-community/datetimepicker
 npm install @react-native-clipboard/clipboard
+npm dedupe
 npm start -c
