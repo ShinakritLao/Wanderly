@@ -13,6 +13,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 
+from PIL import Image, ImageDraw, ImageFont
+import io
+import base64
+
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
 from jose import jwt, JWTError
@@ -298,14 +302,38 @@ async def verify_otp_signup(req: VerifySignupOTPBody):
 # =====================================================
 class SliderCaptchaGenerateResponse(BaseModel):
     token: str
-    puzzle_url: str
+    puzzle_base64: str
     cutout_x: int
     slider_width: int
     expires_at: datetime
 
 def random_text(length=10):
-    chars = string.ascii_letters + string.digits + " "
+    chars = string.ascii_letters + string.digits
     return ''.join(random.choice(chars) for _ in range(length))
+
+def generate_text_box_image(width=300, height=150, text_length=8):
+    img = Image.new("RGB", (width, height), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    try:
+        font = ImageFont.truetype("arial.ttf", 30)
+    except:
+        font = ImageFont.load_default()
+
+    text = random_text(text_length)
+
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = bbox[2] - bbox[0]
+    text_h = bbox[3] - bbox[1]
+
+    x = (width - text_w) // 2
+    y = (height - text_h) // 2
+    draw.text((x, y), text, font=font, fill=(255, 255, 255))
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    base64_img = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return base64_img
 
 @app.get("/captcha/slider/generate", response_model=SliderCaptchaGenerateResponse)
 async def generate_slider_captcha():
@@ -318,13 +346,11 @@ async def generate_slider_captcha():
         "expires_at": expires_at
     }
 
-    text = random_text(12)
-    encoded_text = urllib.parse.quote_plus(text)
-    puzzle_url = f"https://dummyimage.com/300x150/000/fff.png&text={encoded_text}"
+    puzzle_base64 = generate_text_box_image(width=300, height=150, text_length=12)
 
     return SliderCaptchaGenerateResponse(
         token=token,
-        puzzle_url=puzzle_url,
+        puzzle_base64=puzzle_base64,
         cutout_x=cutout_x,
         slider_width=100,
         expires_at=expires_at

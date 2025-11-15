@@ -80,12 +80,12 @@ export default function SliderCaptcha({ onSuccess }) {
       {/* ===== CAPTCHA IMAGE WITH CUTOUT ===== */}
       <View style={styles.puzzleContainer}>
         <Image
-          source={{ uri: captcha.puzzle_url }}
+          source={{ uri: `data:image/png;base64,${captcha.puzzle_base64}` }}
           style={{
-            width: sliderTrackWidth,
-            height: captcha.slider_width,
-            borderRadius: 8,
-          }}
+          width: sliderTrackWidth,
+          height: captcha.slider_width,
+          borderRadius: 8,
+         }}
         />
 
         {/* Visual hint for the slider cutout */}
