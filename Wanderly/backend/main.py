@@ -218,6 +218,58 @@ async def dashboard(uid: str = Depends(verify_jwt)):
     return {"user": data[0]}
 
 # =====================================================
+#              USER PROFILE ENDPOINTS
+# =====================================================
+@app.get("/users/{uid}")
+async def get_user_profile(uid: str, current_uid: str = Depends(verify_jwt)):
+    # Users can only access their own profile
+    if current_uid != uid:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    resp = supabase.table("users").select("*").eq("uid", uid).execute()
+    data = get_supabase_data(resp)
+    if not data:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user = data[0]
+    # Don't return password hash
+    user.pop("password", None)
+    return user
+
+class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+@app.put("/users/{uid}")
+async def update_user_profile(uid: str, req: UpdateProfileRequest, current_uid: str = Depends(verify_jwt)):
+    # Users can only update their own profile
+    if current_uid != uid:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    update_data = {}
+    if req.name is not None:
+        update_data["name"] = req.name
+    if req.email is not None:
+        # Check if email is already taken by another user
+        resp = supabase.table("users").select("*").eq("email", req.email).execute()
+        existing = get_supabase_data(resp)
+        if existing and existing[0]["uid"] != uid:
+            raise HTTPException(status_code=400, detail="Email already taken")
+        update_data["email"] = req.email
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data to update")
+    
+    supabase.table("users").update(update_data).eq("uid", uid).execute()
+    
+    # Fetch and return updated user
+    resp = supabase.table("users").select("*").eq("uid", uid).execute()
+    data = get_supabase_data(resp)
+    user = data[0]
+    user.pop("password", None)
+    return user
+
+# =====================================================
 #                OTP PASSWORD RESET
 # =====================================================
 class OTPRequestBody(BaseModel):
