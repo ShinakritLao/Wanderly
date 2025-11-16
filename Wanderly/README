@@ -37,4 +37,5 @@ npm install @react-native-community/datetimepicker
 npm install @react-native-clipboard/clipboard
 npm dedupe
 npx expo install expo-build-properties
+npm install expo-image-picker
 npm start -c
