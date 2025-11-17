@@ -37,7 +37,8 @@
         "expo-build-properties",
         {
           "android": {
-            "newArchEnabled": true
+            "newArchEnabled": true,
+            "kotlinVersion": "2.0.0"
           },
           "ios": {
             "newArchEnabled": true
