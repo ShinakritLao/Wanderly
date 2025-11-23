@@ -21,6 +21,7 @@ import NewPlace from '../screens/NewPlace';
 import CreateFolder from '../screens/CreateFolder'
 import FolderDetail from '../screens/FolderDetails'
 import Voting from '../screens/Voting'
+import PublicFolderScreen from '../screens/PublicFolderScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -111,6 +112,12 @@ export default function AppNavigator() {
         name="Voting"
         component={Voting}
         options={{ path: "vote/:folderId" }}
+      />
+      {/* Public folder page for shared links */}
+      <Stack.Screen
+        name="PublicFolder"
+        component={PublicFolderScreen}
+        options={{ path: "public-folder/:folderId" }}
       />
     </Stack.Navigator>
   );

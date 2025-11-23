@@ -99,6 +99,23 @@ const FolderDetail = () => {
     navigation.navigate("Voting", { folderId: folder.id });
   };
 
+  // End voting early
+  const handleEndVote = async () => {
+    try {
+      const data = await AsyncStorage.getItem("folders");
+      const folders = data ? JSON.parse(data) : [];
+      const idx = folders.findIndex((f) => f.id === folder.id);
+      if (idx !== -1) {
+        folders[idx].endDate = new Date().toISOString();
+        await AsyncStorage.setItem("folders", JSON.stringify(folders));
+        setFolder({ ...folder, endDate: new Date().toISOString() });
+        Alert.alert("Voting ended", "The poll has been closed.");
+      }
+    } catch (err) {
+      Alert.alert("Error", "Could not end voting early.");
+    }
+  };
+
   const renderResult = ({ item }) => {
     const count = folder.votes && folder.votes[item.id] ? folder.votes[item.id] : 0;
     const percent = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100);
@@ -128,7 +145,16 @@ const FolderDetail = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+
       <View style={styles.headerCard}>
+        {/* Floating close button */}
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.closeButtonText}>×</Text>
+        </TouchableOpacity>
         <Text style={styles.folderTitle}>{folder.name}</Text>
         <View style={styles.metaRow}>
           <Text style={styles.metaText}>👥 {votedPeople} people</Text>
@@ -154,6 +180,13 @@ const FolderDetail = () => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.voteBtn} onPress={openVoting}>
           <Text style={styles.voteText}>Open voting</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.voteBtn, { backgroundColor: '#B71C1C', marginLeft: 8 }]}
+          onPress={handleEndVote}
+          disabled={getRemaining() === 'Poll ended'}
+        >
+          <Text style={[styles.voteText, { color: '#fff' }]}>End Vote</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -283,6 +316,31 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
   },  
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 14,
+    zIndex: 10,
+    backgroundColor: "#fff",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  closeButtonText: {
+    color: "#1B1462",
+    fontSize: 22,
+    fontWeight: "bold",
+    lineHeight: 28,
+    textAlign: "center",
+    marginTop: -2,
+  },
 });
 
 export default FolderDetail;

@@ -13,6 +13,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
+
 const Voting = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -20,7 +21,6 @@ const Voting = () => {
   const [folder, setFolder] = useState(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasVotedThisDevice, setHasVotedThisDevice] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -34,11 +34,6 @@ const Voting = () => {
           return;
         }
         setFolder(found);
-
-        // check local flag whether this device already voted for this folder
-        const votedRaw = await AsyncStorage.getItem("votedFolders");
-        const voted = votedRaw ? JSON.parse(votedRaw) : [];
-        if (voted.includes(folderId)) setHasVotedThisDevice(true);
       } catch (err) {
         console.error(err);
       }
@@ -55,10 +50,6 @@ const Voting = () => {
       Alert.alert("Choose one", "Please pick a place to vote for.");
       return;
     }
-    if (hasVotedThisDevice) {
-      Alert.alert("Already voted", "This device has already voted in this poll.");
-      return;
-    }
     setIsSubmitting(true);
     try {
       const stored = await AsyncStorage.getItem("folders");
@@ -73,13 +64,6 @@ const Voting = () => {
 
       await AsyncStorage.setItem("folders", JSON.stringify(folders));
 
-      // mark this device as voted for this folder
-      const votedRaw = await AsyncStorage.getItem("votedFolders");
-      const voted = votedRaw ? JSON.parse(votedRaw) : [];
-      voted.push(folderId);
-      await AsyncStorage.setItem("votedFolders", JSON.stringify(voted));
-
-      setHasVotedThisDevice(true);
       Alert.alert("Thanks!", "Your vote has been recorded.");
       navigation.goBack();
     } catch (err) {
@@ -128,11 +112,11 @@ const Voting = () => {
       />
 
       <TouchableOpacity
-        style={[styles.voteBtn, (hasVotedThisDevice || ended || !selectedPlaceId) && { opacity: 0.5 }]}
-        disabled={hasVotedThisDevice || ended || !selectedPlaceId || isSubmitting}
+        style={[styles.voteBtn, (ended || !selectedPlaceId) && { opacity: 0.5 }]}
+        disabled={ended || !selectedPlaceId || isSubmitting}
         onPress={submitVote}
       >
-        <Text style={styles.voteBtnText}>{hasVotedThisDevice ? "Voted" : "Vote"}</Text>
+        <Text style={styles.voteBtnText}>Vote</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

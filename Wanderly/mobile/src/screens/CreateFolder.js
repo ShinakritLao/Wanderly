@@ -20,6 +20,7 @@ const CreateFolderScreen = () => {
   const favorites = getFavorites();
   const [selected, setSelected] = useState([]);
   const [folderName, setFolderName] = useState("");
+  const [duration, setDuration] = useState("5"); // default 5 days
   const navigation = useNavigation();
 
   const toggleSelect = (place) => {
@@ -39,6 +40,11 @@ const CreateFolderScreen = () => {
       Alert.alert("Please select at least one place");
       return;
     }
+    const days = parseInt(duration, 10);
+    if (isNaN(days) || days < 1 || days > 30) {
+      Alert.alert("Please enter a valid duration (1-30 days)");
+      return;
+    }
 
     try {
       const storedFolders = await AsyncStorage.getItem("folders");
@@ -48,10 +54,10 @@ const CreateFolderScreen = () => {
       const votes = {};
       selected.forEach((p) => (votes[p.id] = 0));
 
-      // automatically set endDate = 5 days after creation
+      // set endDate = custom days after creation
       const createdAt = new Date();
       const endDate = new Date(createdAt);
-      endDate.setDate(createdAt.getDate() + 5);
+      endDate.setDate(createdAt.getDate() + days);
 
       const newFolder = {
         id: Date.now().toString(),
@@ -88,16 +94,26 @@ const CreateFolderScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.goBack()}>
+        <Text style={styles.closeBtnText}>×</Text>
+      </TouchableOpacity>
       <View style={styles.content}>
         <Text style={styles.title}>Create New Folder</Text>
-  
         <TextInput
           style={styles.input}
           placeholder="Enter folder name"
           value={folderName}
           onChangeText={setFolderName}
         />
-  
+        <Text style={styles.label}>Vote duration (days):</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="5"
+          value={duration}
+          onChangeText={setDuration}
+          keyboardType="numeric"
+          maxLength={2}
+        />
         {favorites.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No favorites available.</Text>
@@ -112,11 +128,10 @@ const CreateFolderScreen = () => {
             renderItem={renderItem}
             showsVerticalScrollIndicator={true}
             contentContainerStyle={styles.scrollContent}
-            style={styles.list} // 👈 add this
+            style={styles.list}
           />
         )}
       </View>
-  
       <TouchableOpacity
         style={[
           styles.submitBtn,
@@ -128,10 +143,32 @@ const CreateFolderScreen = () => {
         <Text style={styles.submitText}>Save Folder</Text>
       </TouchableOpacity>
     </SafeAreaView>
-  );  
+  );
 };
 
 const styles = StyleSheet.create({
+  closeBtn: {
+    position: 'absolute',
+    top: 18,
+    right: 18,
+    zIndex: 10,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  closeBtnText: {
+    fontSize: 26,
+    color: '#1565C0',
+    fontWeight: 'bold',
+    lineHeight: 30,
+    marginTop: -2,
+  },
     container: {
       flex: 1,
       backgroundColor: "#fff",
@@ -157,12 +194,19 @@ const styles = StyleSheet.create({
       marginBottom: 15,
       marginLeft: 20
     },
+    label: {
+      fontSize: 15,
+      color: "#2E3192",
+      marginLeft: 20,
+      marginBottom: 4,
+      fontWeight: "500"
+    },
     input: {
       borderWidth: 1,
       borderColor: "#ccc",
       borderRadius: 10,
       padding: 10,
-      marginBottom: 40,
+      marginBottom: 20,
       marginLeft: 20,
       marginRight: 20
     },
