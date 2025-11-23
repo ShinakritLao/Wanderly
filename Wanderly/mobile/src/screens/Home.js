@@ -12,7 +12,7 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+
 import { mockReviews } from '../data/mockData';
 import { useFavorites } from '../context/FavoritesContext';
 
@@ -98,12 +98,11 @@ const Home = () => {
             toggleFavorite(item.id);
           }}
         >
-          <Feather
-            name="heart"
-            size={20}
-            color={item.favorite === 1 ? '#FF0000' : '#FFF'}
-            fill={item.favorite === 1 ? '#FF0000' : 'transparent'}
-          />
+            <Text style={{ fontSize: 20 }}>
+              {Platform.OS === 'web'
+                ? (item.favorite === 1 ? '❤️' : '🤍')
+                : (item.favorite === 1 ? '❤️' : '🤍')}
+            </Text>
         </TouchableOpacity>
         <View style={styles.placeInfo}>
           <Text style={styles.placeTitle}>{item.name}</Text>
@@ -137,7 +136,7 @@ const Home = () => {
                     <Text style={styles.searchResultName}>{place.name}</Text>
                     <Text style={styles.searchResultLocation}>{place.location}</Text>
                   </View>
-                  <Feather name="chevron-right" size={20} color="#999" />
+                    <Text style={{ fontSize: 20, color: '#999' }}>{'▶️'}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -170,7 +169,7 @@ const Home = () => {
                 setSearchText('');
                 setShowSearchResults(false);
               }}>
-                <Feather name="x" size={18} color="#999" />
+                <Text style={{fontSize: 18}}>{Platform.OS === 'web' ? '❌' : '❌'}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -224,25 +223,24 @@ const Home = () => {
                     style={styles.favoriteButton}
                     onPress={() => toggleFavorite(selectedPlace.id)}
                   >
-                    <Feather
-                      name="heart"
-                      size={24}
-                      color={getPlaceById(selectedPlace.id)?.favorite === 1 ? '#FF0000' : '#FFF'}
-                      fill={getPlaceById(selectedPlace.id)?.favorite === 1 ? '#FF0000' : 'transparent'}
-                    />
+                      <Text style={{ fontSize: 24 }}>
+                        {Platform.OS === 'web'
+                          ? (getPlaceById(selectedPlace.id)?.favorite === 1 ? '❤️' : '🤍')
+                          : (getPlaceById(selectedPlace.id)?.favorite === 1 ? '❤️' : '🤍')}
+                      </Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity 
                     style={styles.closeButton}
                     onPress={closeDetailModal}
                   >
-                    <Feather name="x" size={24} color="#FFF" />
+                      <Text style={{ fontSize: 24, color: '#FFF' }}>{'❌'}</Text>
                   </TouchableOpacity>
                   
                   <Text style={styles.modalPlaceName}>{selectedPlace.name}</Text>
                   
                   <View style={styles.modalLocationRow}>
-                    <Feather name="map-pin" size={16} color="#FFF" />
+                      <Text style={{ fontSize: 16, color: '#FFF' }}>{'📍'}</Text>
                     <Text style={styles.modalLocationText}>{selectedPlace.location}</Text>
                   </View>
                   

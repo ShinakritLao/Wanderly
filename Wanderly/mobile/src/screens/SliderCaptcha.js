@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {View, Image, StyleSheet, PanResponder, Animated, Text, Alert, ActivityIndicator} from "react-native";
+import {View, Image, StyleSheet, PanResponder, Animated, Text, Alert, ActivityIndicator, Platform} from "react-native";
 import { getSliderCaptcha, verifySliderCaptcha } from "../services/api";
 
 export default function SliderCaptcha({ onSuccess }) {
@@ -73,7 +73,7 @@ export default function SliderCaptcha({ onSuccess }) {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>
+      <Text style={[styles.formTitle, { fontFamily: Platform.OS === "web" ? "Poppins" : "Poppins_600SemiBold" }]}> 
         Slide the puzzle to verify
       </Text>
 

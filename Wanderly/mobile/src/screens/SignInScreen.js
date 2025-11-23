@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import {View, Text, TextInput, ActivityIndicator, TouchableOpacity, Image, StyleSheet, Modal} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
+import { Platform } from "react-native";
 import { signInWithEmail } from "../services/api";
 import GoogleLogin from "./GoogleLogin";
 import SliderCaptcha from "../screens/SliderCaptcha";
+
 
 const SignInScreen = ({ navigation }) => {
   const [checking, setChecking] = useState(true);
@@ -14,7 +15,11 @@ const SignInScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showCaptcha, setShowCaptcha] = useState(false);
-  const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
+  let fontsLoaded = true;
+  if (Platform.OS !== "web") {
+    const { useFonts, Poppins_600SemiBold } = require("@expo-google-fonts/poppins");
+    [fontsLoaded] = useFonts({ Poppins_600SemiBold });
+  }
 
   useEffect(() => {
     // Redirect to Home if JWT exists
@@ -83,7 +88,7 @@ const SignInScreen = ({ navigation }) => {
       {/* Sign-in form container */}
       <View style={styles.formWrapper}>
         <View style={styles.formContainer}>
-          <Text style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}>Welcome Back</Text>
+          <Text style={[styles.formTitle, { fontFamily: Platform.OS === "web" ? "Poppins" : "Poppins_600SemiBold" }]}>Welcome Back</Text>
 
           <TextInput
             style={styles.input}

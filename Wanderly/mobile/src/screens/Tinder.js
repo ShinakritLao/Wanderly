@@ -13,7 +13,7 @@ import {
   Modal,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { Feather } from '@expo/vector-icons';
+import { Platform } from 'react-native';
 import { useFavorites } from '../context/FavoritesContext';
 
 const { width, height } = Dimensions.get('window');
@@ -283,7 +283,7 @@ const Tinder = () => {
     <View style={styles.selectedFilterTag}>
       <Text style={styles.selectedFilterText}>{label}</Text>
       <TouchableOpacity onPress={onRemove} style={styles.removeFilterButton}>
-        <Feather name="x" size={14} color="#666" />
+        <Text style={{fontSize: 14}}>{Platform.OS === 'web' ? '❌' : '❌'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -309,7 +309,7 @@ const Tinder = () => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.depletedModal}>
-              <Feather name="heart" size={64} color="#4A90E2" />
+              <Text style={{ fontSize: 64, color: '#4A90E2' }}>{Platform.OS === 'web' ? '❤️' : '❤️'}</Text>
               <Text style={styles.depletedTitle}>All Filtered Content Depleted!</Text>
               <Text style={styles.depletedSubtitle}>
                 You've seen all places matching your filters.
@@ -324,7 +324,7 @@ const Tinder = () => {
           </View>
         </Modal>
         <View style={styles.emptyContainer}>
-          <Feather name="heart" size={64} color="#4A90E2" />
+          <Text style={{ fontSize: 64, color: '#4A90E2' }}>{Platform.OS === 'web' ? '❤️' : '❤️'}</Text>
           <Text style={styles.emptyTitle}>No more places!</Text>
           <TouchableOpacity 
             style={styles.resetButton}
@@ -353,7 +353,7 @@ const Tinder = () => {
           style={styles.filterButtonHeader}
           onPress={() => setShowFilter(!showFilter)}
         >
-          <Feather name="sliders" size={20} color="#4A90E2" />
+          <Text style={{ fontSize: 20, color: '#4A90E2' }}>{Platform.OS === 'web' ? '🎚️' : '🎚️'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -497,10 +497,10 @@ const Tinder = () => {
             <View style={styles.cardInfo}>
               <Text style={styles.placeName}>{filteredPlaces[currentIndex + 1].name}</Text>
               <View style={styles.locationRow}>
-                <Feather name="map-pin" size={14} color="#FFF" />
+                <Text style={{fontSize: 14, marginRight: 2}}>{Platform.OS === 'web' ? '📍' : '📍'}</Text>
                 <Text style={styles.locationText}>{filteredPlaces[currentIndex + 1].location}</Text>
                 <View style={styles.ratingContainer}>
-                  <Feather name="star" size={14} color="#FFD700" fill="#FFD700" />
+                  <Text style={{fontSize: 14, marginRight: 2}}>{Platform.OS === 'web' ? '⭐' : '⭐'}</Text>
                   <Text style={styles.ratingText}>{filteredPlaces[currentIndex + 1].rating}</Text>
                 </View>
               </View>
@@ -525,23 +525,23 @@ const Tinder = () => {
           
           <Animated.View style={[styles.likeIndicator, { opacity: getLikeOpacity() }]}>
             <View style={styles.indicatorCircle}>
-              <Feather name="heart" size={60} color="#4CAF50" />
+              <Text style={{fontSize: 60}}>{Platform.OS === 'web' ? '💚' : '💚'}</Text>
             </View>
           </Animated.View>
 
           <Animated.View style={[styles.rejectIndicator, { opacity: getRejectOpacity() }]}>
             <View style={styles.indicatorCircle}>
-              <Feather name="x" size={60} color="#F44336" />
+              <Text style={{fontSize: 60}}>{Platform.OS === 'web' ? '❌' : '❌'}</Text>
             </View>
           </Animated.View>
 
           <View style={styles.cardInfo}>
             <Text style={styles.placeName}>{currentPlace.name}</Text>
             <View style={styles.locationRow}>
-              <Feather name="map-pin" size={14} color="#FFF" />
+              <Text style={{fontSize: 14, marginRight: 2}}>{Platform.OS === 'web' ? '📍' : '📍'}</Text>
               <Text style={styles.locationText}>{currentPlace.location}</Text>
               <View style={styles.ratingContainer}>
-                <Feather name="star" size={14} color="#FFD700" fill="#FFD700" />
+                <Text style={{fontSize: 14, marginRight: 2}}>{Platform.OS === 'web' ? '⭐' : '⭐'}</Text>
                 <Text style={styles.ratingText}>{currentPlace.rating}</Text>
               </View>
             </View>
@@ -562,7 +562,7 @@ const Tinder = () => {
           onPress={handleSwipeLeft}
           disabled={isAnimating}
         >
-          <Feather name="x" size={24} color="#F44336" />
+          <Text style={{fontSize: 24}}>{Platform.OS === 'web' ? '❌' : '❌'}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -570,7 +570,7 @@ const Tinder = () => {
           onPress={handleSwipeRight}
           disabled={isAnimating}
         >
-          <Feather name="heart" size={24} color="#4CAF50" />
+          <Text style={{fontSize: 24}}>{Platform.OS === 'web' ? '💚' : '💚'}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

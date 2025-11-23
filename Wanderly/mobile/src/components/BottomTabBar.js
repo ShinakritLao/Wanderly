@@ -1,24 +1,24 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+
 
 const BottomTabBar = ({ state, descriptors, navigation }) => {
-  const getIconName = (routeName) => {
+  const getTabEmoji = (routeName) => {
     switch (routeName) {
       case 'Home':
-        return 'home';
+        return '🏠';
       case 'Favorites':
-        return 'star';
+        return '⭐';
       case 'Tinder':
-        return 'plus';
+        return '➕';
       case 'Folder':
-        return 'folder';
+        return '📁';
       case 'NewPlace':
-        return 'flag';
+        return '🚩';
       case 'Profile':
-        return 'user';
+        return '👤';
       default:
-        return 'home';
+        return '❓';
     }
   };
 
@@ -28,7 +28,7 @@ const BottomTabBar = ({ state, descriptors, navigation }) => {
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel || route.name;
         const isFocused = state.index === index;
-        const iconName = getIconName(route.name);
+        const tabEmoji = getTabEmoji(route.name);
 
         const onPress = () => {
           const event = navigation.emit({
@@ -61,11 +61,9 @@ const BottomTabBar = ({ state, descriptors, navigation }) => {
             style={styles.tabButton}
           >
             <View style={[styles.iconContainer, isFocused && styles.activeIconContainer]}>
-              <Feather
-                name={iconName}
-                size={24}
-                color={isFocused ? '#000' : '#999'}
-              />
+              <Text style={{ fontSize: 24, color: isFocused ? '#000' : '#999' }}>
+                {tabEmoji}
+              </Text>
             </View>
             {/* Faint circle indicator */}
             {isFocused && <View style={styles.activeIndicator} />}

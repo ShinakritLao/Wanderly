@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFonts, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
+import { Platform } from "react-native";
 import { sendOtpForSignUp, verifyOtpSignUp } from "../services/api";
 import SliderCaptcha from "../screens/SliderCaptcha";
 
@@ -25,7 +25,11 @@ const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1); // 1 = input info, 2 = verify OTP
   const [showCaptcha, setShowCaptcha] = useState(false);
 
-  const [fontsLoaded] = useFonts({ Poppins_600SemiBold });
+  let fontsLoaded = true;
+  if (Platform.OS !== "web") {
+    const { useFonts, Poppins_600SemiBold } = require("@expo-google-fonts/poppins");
+    [fontsLoaded] = useFonts({ Poppins_600SemiBold });
+  }
 
   useEffect(() => {
     // Auto-login if JWT exists
@@ -145,7 +149,7 @@ const SignUpScreen = ({ navigation }) => {
           {step === 1 ? (
             <>
               <Text
-                style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}
+                style={[styles.formTitle, { fontFamily: Platform.OS === "web" ? "Poppins" : "Poppins_600SemiBold" }]}
               >
                 Get Started
               </Text>
@@ -196,7 +200,7 @@ const SignUpScreen = ({ navigation }) => {
           ) : (
             <>
               <Text
-                style={[styles.formTitle, { fontFamily: "Poppins_600SemiBold" }]}
+                style={[styles.formTitle, { fontFamily: Platform.OS === "web" ? "Poppins" : "Poppins_600SemiBold" }]}
               >
                 Verify OTP
               </Text>

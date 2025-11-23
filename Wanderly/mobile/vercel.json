@@ -1,0 +1,15 @@
+{
+  "name": "wanderly-app",
+  "projectId": "",
+  "orgId": "",
+  "buildCommand": "npx expo export --platform web",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
