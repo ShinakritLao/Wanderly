@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Image, ActivityIndicator, Animated } from "react-native";
+import { View, StyleSheet, Image, ActivityIndicator, Animated, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SplashScreen({ navigation }) {
   const fadeAnim = React.useRef(new Animated.Value(1)).current; // Animation value for fade-out
 
+  const shouldUseNativeDriver = Platform.OS !== 'web';
+
   // Fade-out animation
   const startAnimation = (callback) => {
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 800,
-      useNativeDriver: true,
+      useNativeDriver: shouldUseNativeDriver,
     }).start(() => callback && callback());
   };
 

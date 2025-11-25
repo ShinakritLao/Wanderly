@@ -28,6 +28,7 @@ const Favorites = () => {
 
   const FavoriteCard = ({ item }) => {
     const translateX = useRef(new Animated.Value(0)).current;
+    const shouldUseNativeDriver = Platform.OS !== 'web';
 
     const panResponder = useRef(
       PanResponder.create({
@@ -56,7 +57,7 @@ const Favorites = () => {
             if (gestureState.dx > 10) {
               Animated.spring(translateX, {
                 toValue: 0,
-                useNativeDriver: true,
+                useNativeDriver: shouldUseNativeDriver,
                 tension: 80,
                 friction: 10,
               }).start();
@@ -65,7 +66,7 @@ const Favorites = () => {
               // Keep it open
               Animated.spring(translateX, {
                 toValue: -width * 0.2,
-                useNativeDriver: true,
+                useNativeDriver: shouldUseNativeDriver,
                 tension: 80,
                 friction: 10,
               }).start();
@@ -76,7 +77,7 @@ const Favorites = () => {
             if (gestureState.dx < -50) {
               Animated.spring(translateX, {
                 toValue: -width * 0.2,
-                useNativeDriver: true,
+                useNativeDriver: shouldUseNativeDriver,
                 tension: 80,
                 friction: 10,
               }).start();
@@ -85,7 +86,7 @@ const Favorites = () => {
               // Snap back to closed
               Animated.spring(translateX, {
                 toValue: 0,
-                useNativeDriver: true,
+                useNativeDriver: shouldUseNativeDriver,
                 tension: 80,
                 friction: 10,
               }).start();
@@ -100,7 +101,7 @@ const Favorites = () => {
       Animated.timing(translateX, {
         toValue: -width,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: shouldUseNativeDriver,
       }).start(() => {
         removeFavorite(item.id);
         openCardId.current = null;
@@ -185,9 +186,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   logoContainer: {
     alignItems: 'center',
+    marginVertical: 20,
   },
   logo: {
     width: 250,
@@ -197,14 +202,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#1B1462',
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     marginBottom: 20,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     paddingBottom: 20,
   },
   cardContainer: {

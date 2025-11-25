@@ -19,6 +19,8 @@ import { useFavorites } from '../context/FavoritesContext';
 const { width, height } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
 
+const isMobile = width < 768;
+
 const Tinder = () => {
   const { places, toggleFavorite } = useFavorites();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,6 +40,7 @@ const Tinder = () => {
   const opacity = useRef(new Animated.Value(1)).current;
   const nextCardScale = useRef(new Animated.Value(0.95)).current;
   const nextCardOpacity = useRef(new Animated.Value(0.5)).current;
+  const shouldUseNativeDriver = Platform.OS !== 'web';
 
   useEffect(() => {
     setFilteredPlaces(places);
@@ -161,12 +164,12 @@ const Tinder = () => {
         Animated.parallel([
           Animated.spring(position, {
             toValue: { x: 0, y: 0 },
-            useNativeDriver: true,
+            useNativeDriver: shouldUseNativeDriver,
             friction: 7,
           }),
           Animated.spring(rotate, {
             toValue: 0,
-            useNativeDriver: true,
+            useNativeDriver: shouldUseNativeDriver,
             friction: 7,
           }),
         ]).start();
@@ -192,65 +195,68 @@ const Tinder = () => {
   };
 
   const animateCardOut = (direction, callback) => {
-    const x = direction === 'right' ? width + 100 : -width - 100;
+  const x = direction === 'right' ? width + 100 : -width - 100;
+  
+  Animated.parallel([
+    Animated.timing(position, {
+      toValue: { x, y: 0 },
+      duration: 250,
+      useNativeDriver: shouldUseNativeDriver,
+    }),
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: shouldUseNativeDriver,
+    }),
+    Animated.timing(nextCardScale, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: shouldUseNativeDriver,
+    }),
+    Animated.timing(nextCardOpacity, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: shouldUseNativeDriver,
+    }),
+  ]).start(() => {
+    if (callback) {
+      callback();
+    }
     
-    Animated.parallel([
-      Animated.timing(position, {
-        toValue: { x, y: 0 },
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(nextCardScale, {
-        toValue: 1,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(nextCardOpacity, {
-        toValue: 1,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      // Update index first
-      setCurrentIndex(prev => prev + 1);
-      
-      // Execute callback (for favorite toggle) after animation
-      if (callback) {
-        callback();
-      }
-      
-      // Then reset animations on next frame after React has re-rendered
-      setTimeout(() => {
-        position.setValue({ x: 0, y: 0 });
-        rotate.setValue(0);
-        opacity.setValue(1);
-        nextCardScale.setValue(0.95);
-        nextCardOpacity.setValue(0.5);
-        setIsAnimating(false);
-      }, 16); // Wait one frame (~16ms at 60fps)
-    });
-  };
+    setCurrentIndex(prev => prev + 1);
+    
+    setTimeout(() => {
+      position.setValue({ x: 0, y: 0 });
+      rotate.setValue(0);
+      opacity.setValue(1);
+      nextCardScale.setValue(0.95);
+      nextCardOpacity.setValue(0.5);
+      setIsAnimating(false);
+    }, 16);
+  });
+};
 
   const getCardStyle = () => {
-    const rotateStr = rotate.interpolate({
-      inputRange: [-50, 0, 50],
-      outputRange: ['-10deg', '0deg', '10deg'],
-    });
+  const rotateStr = rotate.interpolate({
+    inputRange: [-50, 0, 50],
+    outputRange: ['-10deg', '0deg', '10deg'],
+  });
 
-    return {
-      transform: [
-        { translateX: position.x },
-        { translateY: position.y },
-        { rotate: rotateStr },
-      ],
-      opacity,
-    };
+  const fadeOpacity = position.x.interpolate({
+    inputRange: [-width, 0, width],
+    outputRange: [0, 1, 0],
+    extrapolate: 'clamp',
+  });
+
+  return {
+    transform: [
+      { translateX: position.x },
+      { translateY: position.y },
+      { rotate: rotateStr },
+    ],
+    opacity: Animated.multiply(opacity, fadeOpacity),
   };
+};
 
   const getLikeOpacity = () => {
     return position.x.interpolate({
@@ -581,17 +587,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     position: 'relative',
   },
   logoContainer: {
     flex: 1,
     alignItems: 'center',
+    marginVertical: 20,
   },
   logo: {
     width: 250,
@@ -599,7 +609,7 @@ const styles = StyleSheet.create({
   },
   filterButtonHeader: {
     position: 'absolute',
-    right: 20,
+    right: 28,  // Changed from 20 to 28 to match header padding
     padding: 10,
     backgroundColor: '#FFF',
     borderRadius: 20,
@@ -625,6 +635,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     width: width - 40,
+    maxWidth: 1120,  // Added: 1200 - 80 (40px padding on each side)
     maxHeight: height * 0.7,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -772,10 +783,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 120,  // Changed from 20 to 28 to match consistent padding
   },
   card: {
-    width: width - 60,
+    width: '100%',  // Changed to use percentage
+    maxWidth: isMobile ? 300 : 750,  // Added: 1200 - 56 (28px padding on each side)
     height: height * 0.6,
     backgroundColor: '#323232',
     borderRadius: 20,
@@ -916,6 +928,7 @@ const styles = StyleSheet.create({
     padding: 30,
     alignItems: 'center',
     width: width - 80,
+    maxWidth: 1120,  // Added: matches filterPanel maxWidth
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

@@ -169,97 +169,100 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginTop: -2,
   },
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      paddingHorizontal: 20,
-      paddingTop: 10,
-    },
-    content: {
-      flex: 1,
-      overflow: "auto", // 👈 allows scrolling on web
-    },
-    list: {
-      flex: 1,
-      overflow: "auto", // 👈 ensures scroll on both platforms
-    },
-    scrollContent: {
-      paddingBottom: 100,
-    },
-    title: {
-      fontSize: 22,
-      fontWeight: "700",
-      color: "#2E3192",
-      marginTop: 30,
-      marginBottom: 15,
-      marginLeft: 20
-    },
-    label: {
-      fontSize: 15,
-      color: "#2E3192",
-      marginLeft: 20,
-      marginBottom: 4,
-      fontWeight: "500"
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: "#ccc",
-      borderRadius: 10,
-      padding: 10,
-      marginBottom: 20,
-      marginLeft: 20,
-      marginRight: 20
-    },
-    item: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "#F5F5F5",
-      padding: 10,
-      borderRadius: 10,
-      marginBottom: 10,
-      marginLeft: 30,
-      marginRight: 30
-    },
-    itemSelected: { borderWidth: 2, borderColor: "#2E3192" },
-    image: { width: 60, height: 60, borderRadius: 10, marginRight: 10 },
-    name: { flex: 1, fontSize: 16, fontWeight: "500" },
-    checkbox: {
-      width: 24,
-      height: 24,
-      borderRadius: 20,
-      borderWidth: 1.5,
-      borderColor: "#2E3192",
-      justifyContent: "center",
-      alignItems: "center",
-      marginLeft: 30
-    },
-    checkedBox: { backgroundColor: "#2E3192" },
-    checkMark: { color: "#fff", fontSize: 16 },
-    submitBtn: {
-      backgroundColor: "#2E3192",
-      borderRadius: 25,
-      paddingVertical: 12,
-      alignItems: "center",
-      marginTop: 10,
-      marginBottom: 30,
-      marginLeft: 20,
-      marginRight: 20
-    },
-    submitText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 50,
-    },
-    emptyText: { color: "#aaa", fontSize: 16, fontWeight: "600" },
-    emptySubtext: {
-      color: "#bbb",
-      fontSize: 14,
-      marginTop: 10,
-      textAlign: "center",
-      paddingHorizontal: 30,
-    },
-  });  
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 28,
+    paddingTop: 10,
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  content: {
+    flex: 1,
+    overflow: "auto",
+  },
+  list: {
+    flex: 1,
+    overflow: "auto",
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#2E3192",
+    marginTop: 30,
+    marginBottom: 15,
+    marginLeft: 0,
+  },
+  label: {
+    fontSize: 15,
+    color: "#2E3192",
+    marginLeft: 0,
+    marginBottom: 4,
+    fontWeight: "500"
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 20,
+    marginLeft: 0,
+    marginRight: 0,
+  },
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    marginLeft: 0,
+    marginRight: 0,
+  },
+  itemSelected: { borderWidth: 2, borderColor: "#2E3192" },
+  image: { width: 60, height: 60, borderRadius: 10, marginRight: 10 },
+  name: { flex: 1, fontSize: 16, fontWeight: "500" },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#2E3192",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  checkedBox: { backgroundColor: "#2E3192" },
+  checkMark: { color: "#fff", fontSize: 16 },
+  submitBtn: {
+    backgroundColor: "#2E3192",
+    borderRadius: 25,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 30,
+    marginLeft: 0,
+    marginRight: 0,
+  },
+  submitText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+  emptyText: { color: "#aaa", fontSize: 16, fontWeight: "600" },
+  emptySubtext: {
+    color: "#bbb",
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: "center",
+    paddingHorizontal: 30,
+  },
+});  
 
 export default CreateFolderScreen;

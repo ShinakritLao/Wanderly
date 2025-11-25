@@ -244,6 +244,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   descriptionInput: {
     height: 100,
@@ -282,6 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     width: '80%',
+    maxWidth: 400,
     alignItems: 'center',
   },
   modalHeader: {
@@ -330,6 +334,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     paddingBottom: 6,
+    marginVertical: 20,
   },
   titleContainer: {
     alignItems: 'center',
@@ -341,7 +346,8 @@ const styles = StyleSheet.create({
     color: '#1B1462',
   },
   formContainer: {
-    padding: 20,
+    paddingHorizontal: 28,
+    paddingVertical: 20,
     backgroundColor: '#fff',
     flexGrow: 1,
   },

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -90,8 +91,10 @@ export default function AppNavigator() {
         headerShown: false,
         ...defaultTransition,
       }}
+      // OPTION 1: Set MainTabs as the initial screen (skips splash/auth)
+      initialRouteName="MainTabs"
     >
-      {/* Initial loading screen */}
+      {/* Initial loading screen - now not shown initially */}
       <Stack.Screen name="Splash" component={SplashScreen} />
       
       {/* Authentication flow */}

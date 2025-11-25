@@ -194,9 +194,16 @@ const FolderDetail = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#fff",
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+  },
   headerCard: {
-    margin: 20,
+    marginHorizontal: 28,
+    marginVertical: 20,
     padding: 18,
     borderRadius: 16,
     backgroundColor: "#27408B",
@@ -205,7 +212,7 @@ const styles = StyleSheet.create({
   folderTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 8 },
   metaRow: { marginTop: 4 },
   metaText: { color: "#DCE6FF", fontSize: 14 },
-  sectionTitle: { fontSize: 20, fontWeight: "700", marginLeft: 20, marginTop: 8, color: "#1B1462" },
+  sectionTitle: { fontSize: 20, fontWeight: "700", marginLeft: 28, marginTop: 8, color: "#1B1462" },
   resultRow: {
     marginTop: 14,
     borderRadius: 14,
@@ -237,7 +244,7 @@ const styles = StyleSheet.create({
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     marginTop: 16,
   },
   copyBtn: {
@@ -267,7 +274,7 @@ const styles = StyleSheet.create({
   voteText: { color: "#fff", fontWeight: "700" },
   resultWrapper: {
     marginTop: 20,
-    marginHorizontal: 20,
+    marginHorizontal: 28,
   },
   
   placeName: {
@@ -305,7 +312,7 @@ const styles = StyleSheet.create({
   
   percentContainer: {
     position: "absolute",
-    left: 40, // margin from the left edge
+    left: 40,
     top: 0,
     bottom: 0,
     justifyContent: "center",

@@ -123,8 +123,21 @@ const Voting = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  header: { fontSize: 28, fontWeight: "800", paddingHorizontal: 20, paddingTop: 18, marginBottom: 8, color: "#11468F" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#fff",
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  header: { 
+    fontSize: 28, 
+    fontWeight: "800", 
+    paddingHorizontal: 28, 
+    paddingTop: 18, 
+    marginBottom: 8, 
+    color: "#11468F" 
+  },
   chooseRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -155,7 +168,7 @@ const styles = StyleSheet.create({
   radioInner: { color: "#203265", fontWeight: "700" },
   voteBtn: {
     backgroundColor: "#00AEEF",
-    marginHorizontal: 20,
+    marginHorizontal: 28,
     marginTop: 20,
     marginBottom: 30,
     paddingVertical: 14,
@@ -163,7 +176,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   voteBtnText: { color: "#fff", fontWeight: "800", fontSize: 18 },
-  ended: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: "#F7EAEA", marginHorizontal: 20, borderRadius: 10, marginTop: 10 },
+  ended: { 
+    paddingHorizontal: 20, 
+    paddingVertical: 10, 
+    backgroundColor: "#F7EAEA", 
+    marginHorizontal: 28, 
+    borderRadius: 10, 
+    marginTop: 10 
+  },
 });
 
 export default Voting;

@@ -268,17 +268,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   logoContainer: {
     alignItems: 'center',
+    marginVertical: 20,
   },
   logo: {
     width: 250,
     height: 120,
   },
   searchWrapper: {
-    marginHorizontal: 20,
-    marginBottom: 20,
+    marginHorizontal: 28,
+    marginBottom: 30,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -299,8 +303,8 @@ const styles = StyleSheet.create({
   searchResultsOverlay: {
     position: 'absolute',
     top: 210,
-    left: 20,
-    right: 20,
+    left: 40,
+    right: 40,
     zIndex: 1000,
   },
   searchResultsContainer: {
@@ -347,11 +351,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1B1462',
     marginBottom: 15,
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
   },
   reviewsList: {
-    paddingLeft: 20,
-    paddingRight: 5,
+    paddingLeft: 28,
+    paddingRight: 20,
   },
   reviewCard: {
     width: 255,
@@ -416,18 +420,19 @@ const styles = StyleSheet.create({
   placesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 20,
-    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    justifyContent: 'center',
+    gap: 20,
   },
   placeCardWrapper: {
-    width: (width - 50) / 2,
+    width: '45%',
     marginBottom: 15,
   },
   leftCard: {
-    marginRight: 5,
+    marginRight: 0,
   },
   rightCard: {
-    marginLeft: 5,
+    marginLeft: 0,
   },
   placeCard: {
     width: '100%',
@@ -495,8 +500,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    width: width - 40,
+    width: Math.min(width - 80, 1120), // Increased padding from 40 to 80 total
     height: height * 0.85,
+    maxHeight: 800,
     borderRadius: 25,
     overflow: 'hidden',
     backgroundColor: '#000',
