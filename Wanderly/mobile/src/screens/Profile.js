@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_API_URL || 'https://wanderly-seeo.onrender.com';
+const BACKEND_URL = process.env.EXPO_PUBLIC_API_URL || 'https://wanderly-puy6.onrender.com';
 
 const Profile = ({ navigation }) => {
   const [profileImage, setProfileImage] = useState('https://via.placeholder.com/150');

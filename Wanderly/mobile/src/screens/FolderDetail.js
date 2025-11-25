@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-const API_BASE_URL = "https://wanderly-seeo.onrender.com";
+const API_BASE_URL = "https://wanderly-puy6.onrender.com";
 
 const FolderDetail = () => {
   const navigation = useNavigation();
