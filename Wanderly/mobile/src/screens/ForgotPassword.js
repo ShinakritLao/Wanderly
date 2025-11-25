@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator, StyleSheet, Alert, Modal} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Platform } from "react-native";
+// import { Platform } from "react-native";
 import { requestOtp, verifyOtpAndResetPassword } from "../services/api";
 import SliderCaptcha from "../screens/SliderCaptcha"; 
 
@@ -16,10 +16,10 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [showCaptcha, setShowCaptcha] = useState(false);
 
   let fontsLoaded = true;
-  if (Platform.OS !== "web") {
+  // if (Platform.OS !== "web") {
     const { useFonts, Poppins_600SemiBold } = require("@expo-google-fonts/poppins");
     [fontsLoaded] = useFonts({ Poppins_600SemiBold });
-  }
+  // }
 
   // Send OTP request
   const handleRequestOtp = async () => {
@@ -86,7 +86,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       {/* Main form section */}
       <View style={styles.formWrapper}>
         <View style={styles.formContainer}>
-          <Text style={[styles.formTitle, { fontFamily: Platform.OS === "web" ? "Poppins" : "Poppins_600SemiBold" }]}> 
+          <Text style={[styles.formTitle, { fontFamily: "Poppins" }]}>
             {step === 1 ? "Reset Password" : "Verify OTP & Set New Password"}
           </Text>
 

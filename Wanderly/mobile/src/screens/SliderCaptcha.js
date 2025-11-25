@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {View, Image, StyleSheet, PanResponder, Animated, Text, Alert, ActivityIndicator, Platform} from "react-native";
+import {View, Image, StyleSheet, PanResponder, Animated, Text, Alert, ActivityIndicator, 
+  // Platform
+} from "react-native";
 import { getSliderCaptcha, verifySliderCaptcha } from "../services/api";
 
 export default function SliderCaptcha({ onSuccess }) {
@@ -73,9 +75,7 @@ export default function SliderCaptcha({ onSuccess }) {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.formTitle, { fontFamily: Platform.OS === "web" ? "Poppins" : "Poppins_600SemiBold" }]}> 
-        Slide the puzzle to verify
-      </Text>
+      <Text style={[styles.formTitle, { fontFamily: "Poppins" }]}>Slide the puzzle to verify</Text>
 
       {/* ===== CAPTCHA IMAGE WITH CUTOUT ===== */}
       <View style={styles.puzzleContainer}>

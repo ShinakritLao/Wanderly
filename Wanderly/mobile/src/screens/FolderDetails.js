@@ -9,7 +9,7 @@ import {
   FlatList,
   Image,
   Alert,
-  Platform
+  // Platform
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -81,11 +81,11 @@ const FolderDetail = () => {
       }
   
       // ✅ Copy to clipboard (supports both web & native)
-      if (Platform.OS === "web") {
+      // if (Platform.OS === "web") {
         await navigator.clipboard.writeText(link);
-      } else {
-        Clipboard.setString(link);
-      }
+      // } else {
+      //   Clipboard.setString(link);
+      // }
   
       // ✅ Confirmation alert
       Alert.alert("Voting link copied!", link);

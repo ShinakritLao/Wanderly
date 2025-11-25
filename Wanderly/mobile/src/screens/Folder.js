@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  Platform,
+  // Platform,
   Alert,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
@@ -74,20 +74,20 @@ const Folder = () => {
           onPress={async () => {
             const link = `https://wanderly-public.netlify.app/public/folder/${item.id}`;
             await Clipboard.setStringAsync(link);
-            if (Platform.OS === 'web') {
+            // if (Platform.OS === 'web') {
               alert('Link copied!');
-            } else {
-              Alert.alert('Link copied!', 'You can now share this folder link.');
-            }
+            // } else {
+            //   Alert.alert('Link copied!', 'You can now share this folder link.');
+            // }
           }}
         >
-          <Text style={{ fontSize: 18, color: '#FFF' }}>{Platform.OS === 'web' ? '🔗' : '🔗'}</Text>
+          <Text style={{ fontSize: 18, color: '#FFF' }}>🔗</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDelete(item.id)}
         >
-          <Text style={{ fontSize: 20, color: '#FFF' }}>{Platform.OS === 'web' ? '🗑️' : '🗑️'}</Text>
+          <Text style={{ fontSize: 20, color: '#FFF' }}>🗑️</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -117,7 +117,7 @@ const Folder = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={{ fontSize: 60, color: '#CCC' }}>{Platform.OS === 'web' ? '📁' : '📁'}</Text>
+          <Text style={{ fontSize: 60, color: '#CCC' }}>📁</Text>
           <Text style={styles.emptyText}>No folders yet</Text>
         </View>
       )}
@@ -125,7 +125,7 @@ const Folder = () => {
       <TouchableOpacity style={styles.createButton} onPress={handleCreate}>
         <Text style={styles.createText}>Create New</Text>
         <View style={styles.plusCircle}>
-          <Text style={{ fontSize: 18, color: '#1B1462' }}>{Platform.OS === 'web' ? '➕' : '➕'}</Text>
+          <Text style={{ fontSize: 18, color: '#1B1462' }}>➕</Text>
         </View>
       </TouchableOpacity>
     </SafeAreaView>

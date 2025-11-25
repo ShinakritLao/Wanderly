@@ -98,11 +98,7 @@ const Home = () => {
             toggleFavorite(item.id);
           }}
         >
-            <Text style={{ fontSize: 20 }}>
-              {Platform.OS === 'web'
-                ? (item.favorite === 1 ? '❤️' : '🤍')
-                : (item.favorite === 1 ? '❤️' : '🤍')}
-            </Text>
+            <Text style={{ fontSize: 20 }}>{item.favorite === 1 ? '❤️' : '🤍'}</Text>
         </TouchableOpacity>
         <View style={styles.placeInfo}>
           <Text style={styles.placeTitle}>{item.name}</Text>
@@ -169,7 +165,7 @@ const Home = () => {
                 setSearchText('');
                 setShowSearchResults(false);
               }}>
-                <Text style={{fontSize: 18}}>{Platform.OS === 'web' ? '❌' : '❌'}</Text>
+                <Text style={{ fontSize: 18 }}>❌</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -223,11 +219,7 @@ const Home = () => {
                     style={styles.favoriteButton}
                     onPress={() => toggleFavorite(selectedPlace.id)}
                   >
-                      <Text style={{ fontSize: 24 }}>
-                        {Platform.OS === 'web'
-                          ? (getPlaceById(selectedPlace.id)?.favorite === 1 ? '❤️' : '🤍')
-                          : (getPlaceById(selectedPlace.id)?.favorite === 1 ? '❤️' : '🤍')}
-                      </Text>
+                      <Text style={{ fontSize: 24 }}>{getPlaceById(selectedPlace.id)?.favorite === 1 ? '❤️' : '🤍'}</Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity 
