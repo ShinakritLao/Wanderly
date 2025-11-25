@@ -137,7 +137,7 @@ const Favorites = () => {
               <Text style={styles.locationText}>{item.location}</Text>
             </View>
             <Text style={styles.description} numberOfLines={3}>
-              {item.description || `Explore the beautiful ${item.name}, one of the most iconic destinations in ${item.location.split(',')[1] || item.location}.`}
+              {item.description}
             </Text>
           </View>
         </Animated.View>
