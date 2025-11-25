@@ -480,7 +480,7 @@ async def get_mock_data():
             "image": att.get("attpicture"),
             "rating": float(att.get("rating")),
             "category": att.get("category"),
-            "price": att.get("price"),
+            "price": float(att.get("price")),
             "environment": att.get("environment"),
             "favorite": att.get("favorite")
         })
@@ -550,7 +550,7 @@ class Place(BaseModel):
     location: str
     description: str
     category: List[str]
-    price: str
+    price: float
     environment: List[str]
 
 @app.post("/attraction")

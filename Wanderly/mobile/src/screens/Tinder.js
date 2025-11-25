@@ -27,6 +27,15 @@ const shuffleArray = (array) => {
     .map(({ value }) => value);
 };
 
+// Fixed Thai Baht price ranges (mocked)
+const PRICE_RANGES = [
+  { id: 'free',    label: 'Free',       min: 0,    max: 0 },
+  { id: '0-200',   label: '฿1–200',     min: 1,    max: 200 },
+  { id: '200-500', label: '฿201–500',   min: 201,  max: 500 },
+  { id: '500-1000',label: '฿501–1,000', min: 501,  max: 1000 },
+  { id: '1000+',   label: '฿1,001+',    min: 1001, max: null }, // null = no upper limit
+];
+
 const Tinder = () => {
   const { places, toggleFavorite } = useFavorites();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,8 +45,8 @@ const Tinder = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({
     category: [],
-    price: [],
-    environment: []
+    price: [],       // will contain PRICE_RANGES ids (e.g. '0-200', '1000+')
+    environment: [],
   });
   const [minMatches, setMinMatches] = useState(1);
 
@@ -55,7 +64,7 @@ const Tinder = () => {
     const shuffledPlaces = shuffleArray(nonFavoritePlaces);
 
     setFilteredPlaces(shuffledPlaces);
-    setCurrentIndex(0); // reset index whenever filteredPlaces changes
+    setCurrentIndex(0); // reset index whenever places change
   }, [places]);
 
   useEffect(() => {
@@ -67,9 +76,8 @@ const Tinder = () => {
   // Preload next images
   useEffect(() => {
     const preloadImages = async () => {
-      // Preload next 2 images
       const imagesToPreload = [];
-      
+
       if (currentIndex + 1 < filteredPlaces.length) {
         imagesToPreload.push(filteredPlaces[currentIndex + 1].image);
       }
@@ -77,11 +85,8 @@ const Tinder = () => {
         imagesToPreload.push(filteredPlaces[currentIndex + 2].image);
       }
 
-      // Prefetch images
       try {
-        await Promise.all(
-          imagesToPreload.map(uri => Image.prefetch(uri))
-        );
+        await Promise.all(imagesToPreload.map(uri => Image.prefetch(uri)));
       } catch (error) {
         console.log('Error preloading images:', error);
       }
@@ -92,31 +97,59 @@ const Tinder = () => {
 
   const applyFilters = () => {
     let filtered = places;
-    
+
     const allSelectedValues = [
       ...selectedFilters.category,
       ...selectedFilters.price,
-      ...selectedFilters.environment
+      ...selectedFilters.environment,
     ];
 
     if (allSelectedValues.length > 0) {
+      // Get the actual range objects that are selected
+      const selectedPriceRanges = PRICE_RANGES.filter(range =>
+        selectedFilters.price.includes(range.id)
+      );
+
       filtered = filtered.filter(place => {
         let matchCount = 0;
-        
+
+        // category filters (strings)
         selectedFilters.category.forEach(cat => {
           if (place.category.includes(cat)) matchCount++;
         });
-        selectedFilters.price.forEach(price => {
-          if (place.price.includes(price)) matchCount++;
-        });
+
+        // price filters (int -> belongs to any selected range)
+        if (selectedPriceRanges.length > 0) {
+          const priceVal = place.price; // int from DB
+          let priceMatched = false;
+
+          for (const range of selectedPriceRanges) {
+            const min = range.min;
+            const max = range.max;
+
+            if (
+              priceVal >= min &&
+              (max === null || priceVal <= max)
+            ) {
+              priceMatched = true;
+              break;
+            }
+          }
+
+          if (priceMatched) {
+            matchCount++;
+          }
+        }
+
+        // environment filters (strings)
         selectedFilters.environment.forEach(env => {
           if (place.environment.includes(env)) matchCount++;
         });
-        
+
         return matchCount >= minMatches;
       });
     }
-    
+
     setFilteredPlaces(filtered);
     setCurrentIndex(0);
     setShowFilter(false);
@@ -129,12 +162,12 @@ const Tinder = () => {
       if (currentFilters.includes(value)) {
         return {
           ...prev,
-          [type]: currentFilters.filter(item => item !== value)
+          [type]: currentFilters.filter(item => item !== value),
         };
       } else {
         return {
           ...prev,
-          [type]: [...currentFilters, value]
+          [type]: [...currentFilters, value],
         };
       }
     });
@@ -143,7 +176,7 @@ const Tinder = () => {
   const removeFilter = (type, value) => {
     setSelectedFilters(prev => ({
       ...prev,
-      [type]: prev[type].filter(item => item !== value)
+      [type]: prev[type].filter(item => item !== value),
     }));
   };
 
@@ -151,7 +184,7 @@ const Tinder = () => {
     setSelectedFilters({
       category: [],
       price: [],
-      environment: []
+      environment: [],
     });
     setMinMatches(1);
     setFilteredPlaces(places);
@@ -193,7 +226,7 @@ const Tinder = () => {
     if (isAnimating) return;
     setIsAnimating(true);
     const placeIdToFavorite = filteredPlaces[currentIndex].id;
-    
+
     // Animate card out first, then toggle favorite after
     animateCardOut('right', () => {
       toggleFavorite(placeIdToFavorite);
@@ -208,7 +241,7 @@ const Tinder = () => {
 
   const animateCardOut = (direction, callback) => {
     const x = direction === 'right' ? width + 100 : -width - 100;
-    
+
     Animated.parallel([
       Animated.timing(position, {
         toValue: { x, y: 0 },
@@ -231,15 +264,12 @@ const Tinder = () => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Update index first
       setCurrentIndex(prev => prev + 1);
-      
-      // Execute callback (for favorite toggle) after animation
+
       if (callback) {
         callback();
       }
-      
-      // Then reset animations on next frame after React has re-rendered
+
       setTimeout(() => {
         position.setValue({ x: 0, y: 0 });
         rotate.setValue(0);
@@ -247,7 +277,7 @@ const Tinder = () => {
         nextCardScale.setValue(0.95);
         nextCardOpacity.setValue(0.5);
         setIsAnimating(false);
-      }, 16); // Wait one frame (~16ms at 60fps)
+      }, 16);
     });
   };
 
@@ -306,11 +336,10 @@ const Tinder = () => {
   const allSelectedFilters = [
     ...selectedFilters.category,
     ...selectedFilters.price,
-    ...selectedFilters.environment
+    ...selectedFilters.environment,
   ];
 
   const allCategories = [...new Set(places.flatMap(p => p.category))].sort();
-  const allPrices = [...new Set(places.flatMap(p => p.price))].sort();
   const allEnvironments = [...new Set(places.flatMap(p => p.environment))].sort();
 
   if (currentIndex >= filteredPlaces.length) {
@@ -329,7 +358,7 @@ const Tinder = () => {
               <Text style={styles.depletedSubtitle}>
                 You've seen all places matching your filters.
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.modalButton}
                 onPress={clearAllFilters}
               >
@@ -341,7 +370,7 @@ const Tinder = () => {
         <View style={styles.emptyContainer}>
           <Text style={{ fontSize: 64, color: '#4A90E2' }}>❤️</Text>
           <Text style={styles.emptyTitle}>No more places!</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.resetButton}
             onPress={clearAllFilters}
           >
@@ -358,13 +387,13 @@ const Tinder = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <Image 
-            source={require('../assets/Wanderly-Color-Logo.png')} 
+          <Image
+            source={require('../assets/Wanderly-Color-Logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.filterButtonHeader}
           onPress={() => setShowFilter(!showFilter)}
         >
@@ -377,7 +406,7 @@ const Tinder = () => {
           <View style={styles.filterPanel}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <Text style={styles.filterTitle}>Filter Places</Text>
-              
+
               <Text style={styles.filterSectionTitle}>Category</Text>
               <View style={styles.filterChipsContainer}>
                 {allCategories.map(cat => (
@@ -392,12 +421,12 @@ const Tinder = () => {
 
               <Text style={styles.filterSectionTitle}>Price Range</Text>
               <View style={styles.filterChipsContainer}>
-                {allPrices.map(price => (
+                {PRICE_RANGES.map(range => (
                   <FilterButton
-                    key={price}
-                    label={price}
-                    isSelected={selectedFilters.price.includes(price)}
-                    onPress={() => toggleFilter('price', price)}
+                    key={range.id}
+                    label={range.label}
+                    isSelected={selectedFilters.price.includes(range.id)}
+                    onPress={() => toggleFilter('price', range.id)}
                   />
                 ))}
               </View>
@@ -424,7 +453,8 @@ const Tinder = () => {
                       </View>
                     </View>
                     <Text style={styles.sliderDescription}>
-                      Show places that match at least {minMatches} of your selected filter{minMatches > 1 ? 's' : ''}
+                      Show places that match at least {minMatches} of your selected filter
+                      {minMatches > 1 ? 's' : ''}
                     </Text>
                     <Slider
                       style={styles.slider}
@@ -452,13 +482,17 @@ const Tinder = () => {
                         onRemove={() => removeFilter('category', cat)}
                       />
                     ))}
-                    {selectedFilters.price.map(price => (
-                      <SelectedFilterTag
-                        key={price}
-                        label={price}
-                        onRemove={() => removeFilter('price', price)}
-                      />
-                    ))}
+                    {selectedFilters.price.map(rangeId => {
+                      const range = PRICE_RANGES.find(r => r.id === rangeId);
+                      if (!range) return null;
+                      return (
+                        <SelectedFilterTag
+                          key={rangeId}
+                          label={range.label}
+                          onRemove={() => removeFilter('price', rangeId)}
+                        />
+                      );
+                    })}
                     {selectedFilters.environment.map(env => (
                       <SelectedFilterTag
                         key={env}
@@ -472,13 +506,13 @@ const Tinder = () => {
             </ScrollView>
 
             <View style={styles.filterActions}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.clearButton}
                 onPress={clearAllFilters}
               >
                 <Text style={styles.clearButtonText}>Clear All</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.confirmButton}
                 onPress={applyFilters}
               >
@@ -492,21 +526,21 @@ const Tinder = () => {
       <View style={styles.cardContainer}>
         {/* Next Card (Background) */}
         {currentIndex + 1 < filteredPlaces.length && (
-          <Animated.View 
+          <Animated.View
             key={`next-${filteredPlaces[currentIndex + 1].id}`}
             style={[
-              styles.card, 
+              styles.card,
               styles.nextCard,
               {
                 transform: [{ scale: nextCardScale }],
                 opacity: nextCardOpacity,
-              }
-            ]} 
+              },
+            ]}
             pointerEvents="none"
           >
-            <Image 
-              source={{ uri: filteredPlaces[currentIndex + 1].image }} 
-              style={styles.cardImage} 
+            <Image
+              source={{ uri: filteredPlaces[currentIndex + 1].image }}
+              style={styles.cardImage}
               resizeMode="cover"
             />
             <View style={styles.cardInfo}>
@@ -531,13 +565,13 @@ const Tinder = () => {
         )}
 
         {/* Current Card */}
-        <Animated.View 
+        <Animated.View
           key={`current-${currentPlace.id}`}
-          style={[styles.card, getCardStyle(), { zIndex: 1 }]} 
+          style={[styles.card, getCardStyle(), { zIndex: 1 }]}
           {...panResponder.panHandlers}
         >
           <Image source={{ uri: currentPlace.image }} style={styles.cardImage} />
-          
+
           <Animated.View style={[styles.likeIndicator, { opacity: getLikeOpacity() }]}>
             <View style={styles.indicatorCircle}>
               <Text style={{ fontSize: 60 }}>💚</Text>
@@ -553,10 +587,10 @@ const Tinder = () => {
           <View style={styles.cardInfo}>
             <Text style={styles.placeName}>{currentPlace.name}</Text>
             <View style={styles.locationRow}>
-                <Text style={{ fontSize: 14, marginRight: 2 }}>📍</Text>
+              <Text style={{ fontSize: 14, marginRight: 2 }}>📍</Text>
               <Text style={styles.locationText}>{currentPlace.location}</Text>
               <View style={styles.ratingContainer}>
-                  <Text style={{ fontSize: 14, marginRight: 2 }}>⭐</Text>
+                <Text style={{ fontSize: 14, marginRight: 2 }}>⭐</Text>
                 <Text style={styles.ratingText}>{currentPlace.rating}</Text>
               </View>
             </View>
@@ -572,20 +606,20 @@ const Tinder = () => {
       </View>
 
       <View style={styles.actionButtons}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.actionButton, styles.rejectButton]}
           onPress={handleSwipeLeft}
           disabled={isAnimating}
         >
-              <Text style={{ fontSize: 24 }}>❌</Text>
+          <Text style={{ fontSize: 24 }}>❌</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.actionButton, styles.likeButton]}
           onPress={handleSwipeRight}
           disabled={isAnimating}
         >
-              <Text style={{ fontSize: 24 }}>💚</Text>
+          <Text style={{ fontSize: 24 }}>💚</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -593,6 +627,7 @@ const Tinder = () => {
 };
 
 const styles = StyleSheet.create({
+  // ... (same styles as you already had)
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',

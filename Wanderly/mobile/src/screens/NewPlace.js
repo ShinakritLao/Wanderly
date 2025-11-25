@@ -93,7 +93,7 @@ setImagePreview(result.assets[0].uri);
           location: location.trim(),
           description: description.trim(),
           category: categories,
-          price: price,
+          price: parseFloat(price),
           environment: environments,
         }),
       });
@@ -137,7 +137,7 @@ return (
       {/* Category Selection */}
       <Text style={styles.label}>Category</Text>
       <View style={styles.selectionRow}>
-        {['Historical', 'Nature'].map(cat => (
+        {['Historical & Cultural', 'Nature & Outdoors', 'Beaches & Islands', 'Food & Dining', 'Shopping', 'Entertainment & Nightlife', 'Adventure & Sports', 'Wellness & Relaxation', 'Arts & Events', 'Family & Kids'].map(cat => (
           <TouchableOpacity
             key={cat}
             style={[
@@ -154,7 +154,7 @@ return (
       {/* Environment Selection */}
       <Text style={styles.label}>Environment</Text>
       <View style={styles.selectionRow}>
-        {['Indoor', 'Outdoor'].map(env => (
+        {['Urban', 'Suburban', 'Rural', 'Beach', 'Mountain', 'Forest', 'Desert', 'Lake/Riverside', 'Island', 'Urban Nature Mix'].map(env => (
           <TouchableOpacity
             key={env}
             style={[
@@ -168,7 +168,7 @@ return (
         ))}
       </View>
 
-      <Text style={styles.label}>Price</Text>
+      <Text style={styles.label}>Price (฿)</Text>
       <TextInput
         placeholder="e.g. 150"
         style={styles.input}

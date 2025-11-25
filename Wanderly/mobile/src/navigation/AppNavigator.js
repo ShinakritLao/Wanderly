@@ -19,7 +19,7 @@ import Profile from '../screens/Profile';
 import BottomTabBar from '../components/BottomTabBar';
 import NewPlace from '../screens/NewPlace';
 import CreateFolder from '../screens/CreateFolder'
-import FolderDetail from '../screens/FolderDetails'
+import FolderDetail from '../screens/FolderDetail'
 import Voting from '../screens/Voting'
 import PublicFolderScreen from '../screens/PublicFolderScreen';
 
