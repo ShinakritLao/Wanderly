@@ -121,12 +121,19 @@ export const FavoritesProvider = ({ children }) => {
     }
   };
 
+  // 👇 NEW: use the *same* logic as above, but only for removing
+  const removeFavorite = async (placeId) => {
+    const place = places.find(p => String(p.id) === String(placeId));
+    // Only do anything if it's currently a favorite
+    if (!place || place.favorite !== 1) return;
+
+    // Reuse the existing, already-working logic
+    await toggleFavorite(placeId);
+  };
+
+
 
   const getFavorites = () => places.filter(p => p.favorite === 1);
-
-  const removeFavorite = (placeId) => {
-    setPlaces(prev => prev.map(p => p.id === placeId ? { ...p, favorite: 0 } : p));
-  };
 
   const addPlace = (newPlaceData) => {
     const newPlace = {
