@@ -476,6 +476,7 @@ async def get_mock_data():
             "id": str(att.get("attid")),
             "name": att.get("name"),
             "location": att.get("location"),
+            "description": att.get("description"),
             "image": att.get("attpicture"),
             "rating": float(att.get("rating")),
             "category": att.get("category"),
