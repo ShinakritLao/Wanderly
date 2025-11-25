@@ -268,79 +268,57 @@ const FolderDetail = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#fff",
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+  },
   headerCard: {
-    margin: 20,
+    marginHorizontal: 28,
+    marginVertical: 20,
     padding: 18,
     borderRadius: 16,
     backgroundColor: "#27408B",
     elevation: 3,
   },
-  folderTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 8,
-  },
+  folderTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 8 },
   metaRow: { marginTop: 4 },
   metaText: { color: "#DCE6FF", fontSize: 14 },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginLeft: 20,
-    marginTop: 8,
-    color: "#1B1462",
-  },
-
-  resultWrapper: {
-    marginTop: 20,
-    marginHorizontal: 20,
-  },
-  placeName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1B1462",
-    marginBottom: 6,
-    marginLeft: 4,
-  },
+  sectionTitle: { fontSize: 20, fontWeight: "700", marginLeft: 28, marginTop: 8, color: "#1B1462" },
   resultRow: {
+    marginTop: 14,
     borderRadius: 14,
     overflow: "hidden",
     backgroundColor: "#eee",
     height: 80,
-    position: "relative",
   },
-  resultImage: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
-    borderRadius: 14,
-  },
+  resultImage: { width: "100%", height: "100%", position: "absolute" },
   resultOverlay: {
     position: "absolute",
     left: 0,
     top: 0,
     bottom: 0,
     backgroundColor: "rgba(35, 48, 108, 0.75)",
-    borderTopLeftRadius: 14,
-    borderBottomLeftRadius: 14,
-  },
-  percentContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },  
+  percentText: { color: "#fff", fontSize: 20, fontWeight: "700" },
+  resultName: {
     position: "absolute",
-    left: 40,
+    left: "38%",
     top: 0,
     bottom: 0,
     justifyContent: "center",
+    paddingLeft: 12,
   },
-  percentText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "700",
-  },
+  itemName: { color: "#fff", fontSize: 16, fontWeight: "700" },
+
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     marginTop: 16,
   },
   copyBtn: {
@@ -353,12 +331,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     marginRight: 8,
-    marginBottom: 30,
+    marginBottom: 30
   },
-  copyText: {
-    color: "#1B1462",
-    fontWeight: "700",
-  },
+  copyText: { color: "#1B1462", fontWeight: "700" },
   voteBtn: {
     backgroundColor: "#1B1462",
     paddingVertical: 12,
@@ -368,12 +343,60 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     marginLeft: 8,
-    marginBottom: 30,
+    marginBottom: 30
   },
-  voteText: {
-    color: "#fff",
+  voteText: { color: "#fff", fontWeight: "700" },
+  resultWrapper: {
+    marginTop: 20,
+    marginHorizontal: 28,
+  },
+  
+  placeName: {
+    fontSize: 16,
     fontWeight: "700",
+    color: "#1B1462",
+    marginBottom: 6,
+    marginLeft: 4,
   },
+  
+  resultRow: {
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#eee",
+    height: 80,
+    position: "relative",
+  },
+  
+  resultImage: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    borderRadius: 14,
+  },
+  
+  resultOverlay: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: "rgba(35, 48, 108, 0.75)",
+    borderTopLeftRadius: 14,
+    borderBottomLeftRadius: 14,
+  },
+  
+  percentContainer: {
+    position: "absolute",
+    left: 40,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+  },
+  
+  percentText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+  },  
   closeButton: {
     position: "absolute",
     top: 10,

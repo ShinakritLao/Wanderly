@@ -120,9 +120,13 @@ setImagePreview(result.assets[0].uri);
 
 return (
 <SafeAreaView style={styles.container}>
-<View style={styles.logoTop}>
-<Image source={require('../assets/Wanderly-Color-Logo.png')} style={styles.logo} resizeMode="contain" />
-</View>
+<View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/Wanderly-Color-Logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
   <View style={styles.titleContainer}>
     <Text style={styles.headerTitle}>Add New Place</Text>
   </View>
@@ -224,7 +228,9 @@ return (
 };
 
 const styles = StyleSheet.create({
-container: { flex: 1, backgroundColor: '#FFFFFF' },
+container: { flex: 1, backgroundColor: '#FFFFFF', maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%', },
 descriptionInput: { height: 100, paddingTop: 12, textAlignVertical: 'top' },
 imagePreviewContainer: { marginTop: 12, borderRadius: 8, overflow: 'hidden' },
 imagePreview: { width: '100%', height: 200, borderRadius: 8 },
@@ -240,14 +246,18 @@ modalButton: { paddingVertical: 10, paddingHorizontal: 30, borderRadius: 8, minW
 yesButton: { backgroundColor: '#4CAF50' },
 noButton: { backgroundColor: '#F44336' },
 modalButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600', textAlign: 'center' },
-logoTop: { alignItems: 'center', paddingTop: 12, paddingBottom: 6 },
 titleContainer: { alignItems: 'center', paddingBottom: 6 },
 headerTitle: { fontSize: 28, fontWeight: '700', color: '#1B1462' },
 formContainer: { padding: 20, backgroundColor: '#fff', flexGrow: 1 },
 label: { fontSize: 14, color: '#333', marginTop: 12, marginBottom: 6, fontWeight: '600' },
 input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, backgroundColor: '#fafafa' },
-logo: { width: 250, height: 120 },
-button: { marginTop: 24, backgroundColor: '#007AFF', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+button: { marginTop: 24, backgroundColor: '#007AFF', paddingVertical: 12, borderRadius: 8, alignItems: 'center' }, logoContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  logo: {
+    width: 250,
+    height: 120 },
 buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 selectionRow: {
   flexDirection: 'row',

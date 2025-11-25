@@ -19,6 +19,8 @@ import { useFavorites } from '../context/FavoritesContext';
 const { width, height } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
 
+const isMobile = width < 768; 
+
 // Utility function to shuffle an array
 const shuffleArray = (array) => {
   return array
@@ -628,21 +630,24 @@ const Tinder = () => {
 };
 
 const styles = StyleSheet.create({
-  // ... (same styles as you already had)
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#FFF',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     position: 'relative',
   },
   logoContainer: {
     flex: 1,
     alignItems: 'center',
+    marginVertical: 20,
   },
   logo: {
     width: 250,
@@ -650,7 +655,7 @@ const styles = StyleSheet.create({
   },
   filterButtonHeader: {
     position: 'absolute',
-    right: 20,
+    right: 28,  // Changed from 20 to 28 to match header padding
     padding: 10,
     backgroundColor: '#FFF',
     borderRadius: 20,
@@ -676,6 +681,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     width: width - 40,
+    maxWidth: 1120,  // Added: 1200 - 80 (40px padding on each side)
     maxHeight: height * 0.7,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -823,10 +829,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 120,  // Changed from 20 to 28 to match consistent padding
   },
   card: {
-    width: width - 60,
+    width: '100%',  // Changed to use percentage
+    maxWidth: isMobile ? 300 : 750,  // Added: 1200 - 56 (28px padding on each side)
     height: height * 0.6,
     backgroundColor: '#323232',
     borderRadius: 20,
@@ -967,6 +974,7 @@ const styles = StyleSheet.create({
     padding: 30,
     alignItems: 'center',
     width: width - 80,
+    maxWidth: 1120,  // Added: matches filterPanel maxWidth
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -1023,5 +1031,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
 
 export default Tinder;

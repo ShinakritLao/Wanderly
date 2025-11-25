@@ -300,6 +300,9 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   loadingContainer: {
     flex: 1,
@@ -386,7 +389,7 @@ const styles = StyleSheet.create({
     color: '#333333',
   },
   editButton: {
-    marginLeft: 10,
+    // marginLeft: 10,
     padding: 5,
   },
   editIcon: {
@@ -440,6 +443,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '85%',
+    maxWidth: 500,
     backgroundColor: '#ffffff',
     borderRadius: 15,
     padding: 20,

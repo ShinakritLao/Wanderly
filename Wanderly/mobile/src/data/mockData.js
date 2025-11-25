@@ -5,7 +5,7 @@ export const mockReviews = [
     id: '1',
     placeName: 'Byodo-In Temple',
     image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&q=80',
-    userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+    userAvatar: 'https://www.thelist.com/img/gallery/madison-beer-is-stunning-going-makeup-free/intro-1719928117.jpg',
     rating: 5,
     reviewCount: 234,
     snippet: "Don't miss the koi pond in this absolutely stunning temple in a beautiful location."
@@ -14,19 +14,37 @@ export const mockReviews = [
     id: '2',
     placeName: 'Golden Gate Bridge',
     image: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&q=80',
-    userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+    userAvatar: 'https://a-static.besthdwallpaper.com/cute-smiling-karina-from-aespa-live-my-life-mv-shoot-wallpaper-2880x1800-126223_8.jpg',
     rating: 4,
-    reviewCount: 1567,
+    reviewCount: 1467,
     snippet: "Iconic bridge with stunning views, especially at sunset. Must visit when in San Francisco."
   },
   {
     id: '3',
     placeName: 'Santorini Sunset',
     image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&q=80',
-    userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
+    userAvatar: 'https://pbs.twimg.com/media/DU_bfoDVwAAHjdd.jpg',
     rating: 5,
     reviewCount: 892,
     snippet: "The most beautiful sunset I've ever seen. The white buildings against the blue sea are magical."
+  },
+    {
+    id: '4',
+    placeName: 'Northern Lights',
+    image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80',
+    userAvatar: 'https://lovelace-media.imgix.net/uploads/749/4414a240-42da-0134-3e14-0ad17316e277.jpg',
+    rating: 4.9,
+    reviewCount: 452,
+    snippet: "Once in a lifetime! One of the most beatiful place in the world."
+  },
+  {
+    id: '5',
+    placeName: 'Statue Of Liberty',
+    image: 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=800&q=80',
+    userAvatar: 'https://pyxis.nymag.com/v1/imgs/fbb/fa4/2ab1f5bfe05a1ced0d77cd94a83f315ea8-01-stranger-things-hairspray.rsquare.w400.jpg',
+    rating: 4.4,
+    reviewCount: 1123,
+    snippet: "You aren't in New York if you never come to visit her!"
   }
 ];
 

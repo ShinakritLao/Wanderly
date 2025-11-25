@@ -193,11 +193,32 @@ const Folder = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF' },
-  logoContainer: { alignItems: 'center', marginBottom: 10 },
-  logo: { width: 250, height: 120 },
-  title: { fontSize: 28, fontWeight: '700', paddingHorizontal: 25, marginBottom: 20 },
-  listContainer: { paddingHorizontal: 20, paddingBottom: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  logo: {
+    width: 250,
+    height: 120,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    paddingHorizontal: 28,
+    marginBottom: 20,
+    color: '#1B1462',
+  },
+  listContainer: {
+    paddingHorizontal: 28,
+    paddingBottom: 40,
+  },
   folderCard: {
     backgroundColor: '#E3F2FD',
     borderRadius: 16,
@@ -207,11 +228,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     position: 'relative',
   },
-  folderHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  folderTitle: { fontSize: 18, fontWeight: '700', color: '#1B1462' },
-  folderDate: { fontSize: 12, color: '#555' },
-  folderImages: { flexDirection: 'row', marginTop: 10, alignItems: 'center' },
-  previewImage: { width: 80, height: 80, borderRadius: 40, marginRight: 10 },
+  folderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  folderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1B1462',
+  },
+  folderImages: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  previewImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 10,
+  },
   iconButton: {
     backgroundColor: '#2196F3',
     borderRadius: 20,
@@ -224,8 +260,18 @@ const styles = StyleSheet.create({
     padding: 6,
     marginLeft: 0,
   },
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 80, marginBottom: 40 },
-  emptyText: { fontSize: 16, color: '#999', marginTop: 10, marginBottom: 30 },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 80,
+    marginBottom: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    marginTop: 10,
+    marginBottom: 30,
+  },
   createButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -238,7 +284,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     marginBottom: 30,
   },
-  createText: { fontSize: 16, fontWeight: '600', color: '#1B1462', marginRight: 8 },
+  createText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1B1462',
+    marginRight: 8,
+  },
+  plusCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    borderColor: '#1B1462',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 export default Folder;

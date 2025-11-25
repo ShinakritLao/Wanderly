@@ -185,9 +185,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
   },
   logoContainer: {
     alignItems: 'center',
+    marginVertical: 20,
   },
   logo: {
     width: 250,
@@ -197,14 +201,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#1B1462',
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     marginBottom: 20,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 28,
     paddingBottom: 20,
   },
   cardContainer: {
