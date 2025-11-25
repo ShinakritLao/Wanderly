@@ -127,7 +127,7 @@ const Folder = () => {
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: '#2196F3' }]}
             onPress={async () => {
-              const link = `${API_BASE_URL}/public/folder/${item.folderid}`;
+              const link = `${window.location.origin}/vote/${item.folderid}`;
               await Clipboard.setStringAsync(link);
               alert('Link copied!');
             }}

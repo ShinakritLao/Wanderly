@@ -6,7 +6,7 @@ import { SUPABASE_URL, SUPABASE_KEY } from '@env';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-URL_ = process.env.EXPO_PUBLIC_API_URL
+const URL_ = process.env.EXPO_PUBLIC_API_URL
 
 const NewPlace = ({ navigation }) => {
   const { addPlace } = useFavorites();

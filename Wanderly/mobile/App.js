@@ -4,14 +4,33 @@ import AppNavigator from "./src/navigation/AppNavigator";
 import { FavoritesProvider } from "./src/context/FavoritesContext"; // Add this import
 
 const linking = {
-  prefixes: ["https://wanderly.com", "wanderly://"],
+  prefixes: [
+    "https://wanderly-db.netlify.app",
+    "https://wanderly.com",
+    "wanderly://",
+  ],
   config: {
     screens: {
+      // Tabs
+      MainTabs: {
+        screens: {
+          Home: "home",
+          Favorites: "favorites",
+          Tinder: "tinder",
+          NewPlace: "newplace",
+          Folder: "folder",
+          Profile: "profile",
+        },
+      },
+
+      // Standalone screens
       FolderDetail: "folder/:folderId",
       Voting: "vote/:folderId",
+      PublicFolder: "public-folder/:folderId",
     },
   },
 };
+
 
 export default function App() {
   console.log("App mounted successfully");

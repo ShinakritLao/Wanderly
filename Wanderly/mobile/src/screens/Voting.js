@@ -44,7 +44,7 @@ const Voting = () => {
         if (!res.ok) {
           console.error("Failed to load folder for voting:", await res.text());
           Alert.alert("Error", "Folder not found");
-          navigation.goBack();
+          navigation.navigate("MainTabs", { screen: "Home" });
           return;
         }
         const json = await res.json();
@@ -53,7 +53,7 @@ const Voting = () => {
       } catch (err) {
         console.error("Voting load error:", err);
         Alert.alert("Error", "Could not load folder for voting.");
-        navigation.goBack();
+        navigation.navigate("MainTabs", { screen: "Home" });
       }
     };
     load();
@@ -69,44 +69,55 @@ const Voting = () => {
     });
   };
 
-  // SUBMIT MULTIPLE VOTES
-  const submitVote = async () => {
-    if (selectedAttids.length === 0) {
-      Alert.alert("Choose at least one", "Please pick at least one place.");
-      return;
-    }
-    if (!folder) return;
+const submitVote = async () => {
+  if (selectedAttids.length === 0) {
+    Alert.alert("Choose at least one", "Please pick at least one place.");
+    return;
+  }
+  if (!folder) return;
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      const uid = getUidFromJWT() || "anonymous";
-      const nowIso = new Date().toISOString();
+  try {
+    const uid = getUidFromJWT() || "anonymous";
+    const nowIso = new Date().toISOString();
 
-      for (const attid of selectedAttids) {
-        const payload = {
-          folderid: folder.folderid,
-          attid: attid,
-          voter: uid,
-          timevoted: nowIso,
-        };
+    // Make sure we only send unique choices
+    const uniqueAttids = [...new Set(selectedAttids)];
 
-        await fetch(`${API_BASE_URL}/voting`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+    // Send 1 POST per place (backend wants this)
+    for (const attid of uniqueAttids) {
+      const payload = {
+        folderid: folder.folderid,
+        attid,
+        voter: uid,
+        timevoted: nowIso,
+      };
+
+      const res = await fetch(`${API_BASE_URL}/voting`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        console.error("Vote error:", await res.text());
       }
-
-      Alert.alert("Thanks!", "Your votes have been recorded.");
-      navigation.goBack();
-    } catch (err) {
-      console.error("Vote error:", err);
-      Alert.alert("Error", "Could not submit votes.");
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    Alert.alert("Thanks!", "Your votes have been recorded.");
+
+    // After finishing all votes → go HOME tab
+    navigation.navigate("MainTabs", { screen: "Home" });
+
+  } catch (err) {
+    console.error("Vote error:", err);
+    Alert.alert("Error", "Could not submit votes.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   if (!folder) return null;
 

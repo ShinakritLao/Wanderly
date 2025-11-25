@@ -21,7 +21,9 @@ const FolderDetail = () => {
 
   const [folder, setFolder] = useState(null);
   const [attractions, setAttractions] = useState([]);
-  const [voteCounts, setVoteCounts] = useState({}); // { attid: count }
+  const [voteCounts, setVoteCounts] = useState({});
+  const [rows, setRows] = useState([]); // <-- all votes from backend
+  const [votedPeople, setVotedPeople] = useState(0); // <-- unique voters
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
 
@@ -37,21 +39,30 @@ const FolderDetail = () => {
       }
       const folderJson = await folderRes.json();
       setFolder(folderJson.folder);
-      setAttractions(Array.isArray(folderJson.attractions) ? folderJson.attractions : []);
+      setAttractions(
+        Array.isArray(folderJson.attractions) ? folderJson.attractions : []
+      );
 
-      // 2) Load votes for this folder
+      // 2) Load all votes for this folder
       const votesRes = await fetch(`${API_BASE_URL}/voting/${folderId}`);
       if (!votesRes.ok) {
         console.error("Failed to load votes:", await votesRes.text());
       } else {
         const votesJson = await votesRes.json();
-        const rows = Array.isArray(votesJson.data) ? votesJson.data : [];
+        const voteRows = Array.isArray(votesJson.data) ? votesJson.data : [];
+
+        setRows(voteRows);
+
+        // Count votes per attraction
         const counts = {};
-        rows.forEach((v) => {
-          const key = v.attid;
-          counts[key] = (counts[key] || 0) + 1;
+        voteRows.forEach((v) => {
+          counts[v.attid] = (counts[v.attid] || 0) + 1;
         });
         setVoteCounts(counts);
+
+        // Count unique voters
+        const unique = new Set(voteRows.map((v) => v.voter));
+        setVotedPeople(unique.size);
       }
     } catch (err) {
       console.error("Error loading folder detail:", err);
@@ -65,6 +76,7 @@ const FolderDetail = () => {
     loadData();
 
     const timer = setInterval(() => setNow(new Date()), 30000);
+
     return () => {
       unsubscribe();
       clearInterval(timer);
@@ -79,11 +91,13 @@ const FolderDetail = () => {
     );
   }
 
-  const createdDate = folder?.timecreated ? new Date(folder.timecreated) : null;
+  const createdDate = folder?.timecreated
+    ? new Date(folder.timecreated)
+    : null;
   const endDate = folder?.timeclosed ? new Date(folder.timeclosed) : null;
 
-  const totalVotes = Object.values(voteCounts).reduce((sum, c) => sum + c, 0);
-  const votedPeople = totalVotes;
+  // Total votes for percentage calculation
+  const totalVotes = rows.length;
 
   const getRemaining = () => {
     if (!endDate) return "-";
@@ -130,7 +144,7 @@ const FolderDetail = () => {
         },
         body: JSON.stringify({
           timeclosed: nowIso,
-          pollstatus: false, // 👈 boolean, matches backend change
+          pollstatus: false,
         }),
       });
 
@@ -153,7 +167,8 @@ const FolderDetail = () => {
   const renderResult = ({ item }) => {
     const attid = item.attid;
     const count = voteCounts[attid] || 0;
-    const percent = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100);
+    const percent =
+      totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100);
 
     const title = item.attname || item.name || `Attraction ${attid}`;
 
@@ -163,14 +178,21 @@ const FolderDetail = () => {
 
         <View style={styles.resultRow}>
           {item.attpicture ? (
-            <Image source={{ uri: item.attpicture }} style={styles.resultImage} />
+            <Image
+              source={{ uri: item.attpicture }}
+              style={styles.resultImage}
+            />
           ) : (
-            <View style={[styles.resultImage, { backgroundColor: "#ddd" }]} />
+            <View
+              style={[styles.resultImage, { backgroundColor: "#ddd" }]}
+            />
           )}
 
-          <View style={[styles.resultOverlay, { width: `${percent}%` }]} />
+          <View
+            style={[styles.resultOverlay, { width: `${percent}%` }]}
+          />
 
-          <View className="percentContainer" style={styles.percentContainer}>
+          <View style={styles.percentContainer}>
             <Text style={styles.percentText}>{percent}%</Text>
           </View>
         </View>
@@ -183,22 +205,29 @@ const FolderDetail = () => {
       <View style={styles.headerCard}>
         <TouchableOpacity
           style={styles.closeButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate("MainTabs", { screen: "Folder" })}
           activeOpacity={0.7}
         >
           <Text style={styles.closeButtonText}>×</Text>
         </TouchableOpacity>
 
-        <Text style={styles.folderTitle}>{folder?.foldername || "Folder"}</Text>
+        <Text style={styles.folderTitle}>
+          {folder?.foldername || "Folder"}
+        </Text>
 
         <View style={styles.metaRow}>
           <Text style={styles.metaText}>👥 {votedPeople} people</Text>
+
           {createdDate && endDate && (
             <Text style={styles.metaText}>
-              {createdDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
+              {createdDate.toLocaleDateString()} -{" "}
+              {endDate.toLocaleDateString()}
             </Text>
           )}
-          <Text style={[styles.metaText, { marginTop: 6 }]}>Remaining: {remaining}</Text>
+
+          <Text style={[styles.metaText, { marginTop: 6 }]}>
+            Remaining: {remaining}
+          </Text>
         </View>
       </View>
 
@@ -221,9 +250,11 @@ const FolderDetail = () => {
         <TouchableOpacity style={styles.copyBtn} onPress={handleCopyLink}>
           <Text style={styles.copyText}>Copy link</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.voteBtn} onPress={openVoting}>
           <Text style={styles.voteText}>Open voting</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.voteBtn, { backgroundColor: "#B71C1C", marginLeft: 8 }]}
           onPress={handleEndVote}
@@ -245,10 +276,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#27408B",
     elevation: 3,
   },
-  folderTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 8 },
+  folderTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 8,
+  },
   metaRow: { marginTop: 4 },
   metaText: { color: "#DCE6FF", fontSize: 14 },
-  sectionTitle: { fontSize: 20, fontWeight: "700", marginLeft: 20, marginTop: 8, color: "#1B1462" },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginLeft: 20,
+    marginTop: 8,
+    color: "#1B1462",
+  },
 
   resultWrapper: {
     marginTop: 20,
@@ -313,7 +355,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 30,
   },
-  copyText: { color: "#1B1462", fontWeight: "700" },
+  copyText: {
+    color: "#1B1462",
+    fontWeight: "700",
+  },
   voteBtn: {
     backgroundColor: "#1B1462",
     paddingVertical: 12,
@@ -325,7 +370,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     marginBottom: 30,
   },
-  voteText: { color: "#fff", fontWeight: "700" },
+  voteText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
   closeButton: {
     position: "absolute",
     top: 10,
