@@ -14,7 +14,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useNavigation } from '@react-navigation/native';
 
 // 🔧 Change this to your FastAPI URL if different
-const API_BASE_URL = 'http://127.0.0.1:8081';
+const API_BASE_URL = 'https://wanderly-seeo.onrender.com';
 
 // Helper to get uid from JWT in localStorage
 const getUidFromJWT = () => {

@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useFavorites } from "../context/FavoritesContext";
 
 // 👉 Change this to your real backend URL
-const API_BASE_URL = "http://127.0.0.1:8081"; // or e.g. "https://your-api.com"
+const API_BASE_URL = "https://wanderly-seeo.onrender.com"; // or e.g. "https://your-api.com"
 
 // Helper to get uid from JWT stored in localStorage
 const getUidFromJWT = () => {

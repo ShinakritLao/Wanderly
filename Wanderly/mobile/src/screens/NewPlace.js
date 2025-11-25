@@ -84,7 +84,7 @@ setImagePreview(result.assets[0].uri);
 
       const publicUrl = supabase.storage.from('Attraction Pictures').getPublicUrl(filename).data.publicUrl;
       
-      const res = await fetch("http://127.0.0.1:8081/attraction", {
+      const res = await fetch("https://wanderly-seeo.onrender.com/attraction", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

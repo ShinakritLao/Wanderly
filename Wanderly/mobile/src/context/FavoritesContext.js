@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const FavoritesContext = createContext();
-const BackendURL = 'http://127.0.0.1:8081'; // adjust if needed
+const BackendURL = 'https://wanderly-seeo.onrender.com'; // adjust if needed
 
 export const useFavorites = () => {
   const context = useContext(FavoritesContext);

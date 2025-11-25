@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
-const API_BASE_URL = "http://127.0.0.1:8081";
+const API_BASE_URL = "https://wanderly-seeo.onrender.com";
 
 const getUidFromJWT = () => {
   try {
