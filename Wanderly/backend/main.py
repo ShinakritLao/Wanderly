@@ -43,8 +43,7 @@ app.add_middleware(
 )
 
 # Load environment variables
-env_path = Path(__file__).parent.parent / "mobile" / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv()
 
 # Environment configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
