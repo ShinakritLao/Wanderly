@@ -483,7 +483,7 @@ class Favorite(BaseModel):
     attid: str
     timecreated: str
 
-@app.post("/favorite")
+@app.post("/favorites")
 def add_favorite(fav: Favorite):
     return insert_into_supabase("favorite", fav.dict(), "Favorite added successfully")
 
@@ -523,3 +523,25 @@ class FoldeAtt(BaseModel):
 @app.post("/folerattraction")
 def add_folder(folerattraction: FoldeAtt):
     return insert_into_supabase("folerattraction", folerattraction.dict(), "Folder's attraction added successfully")
+
+@app.get("/mock-data")
+async def get_mock_data():
+    # Fetch all attractions
+    response = supabase.table("attraction").select("*").execute()
+    attractions = response.data
+
+    # Convert to mockPlaces format
+    mockPlaces = []
+    for att in attractions:
+        mockPlaces.append({
+            "id": str(att.get("attid")),
+            "name": att.get("name"),
+            "location": att.get("location"),
+            "image": att.get("attpicture"),
+            "rating": float(att.get("rating")),
+            "category": att.get("category"),
+            "price": att.get("price"),
+            "environment": att.get("environment"),
+            "favorite": att.get("favorite")
+        })
+    return {"mockPlaces": mockPlaces}
