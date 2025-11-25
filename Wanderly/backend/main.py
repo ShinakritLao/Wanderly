@@ -16,6 +16,7 @@ from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 from typing import List
 from pydantic import BaseModel
+from typing import List
 
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -463,6 +464,28 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ------------------------------- SUPABASE QUERY FOR MAIN FEATURES -------------------------------
 
+@app.get("/mock-data")
+async def get_mock_data():
+    # Fetch all attractions
+    response = supabase.table("attraction").select("*").execute()
+    attractions = response.data
+
+    # Convert to mockPlaces format
+    mockPlaces = []
+    for att in attractions:
+        mockPlaces.append({
+            "id": str(att.get("attid")),
+            "name": att.get("name"),
+            "location": att.get("location"),
+            "image": att.get("attpicture"),
+            "rating": float(att.get("rating")),
+            "category": att.get("category"),
+            "price": att.get("price"),
+            "environment": att.get("environment"),
+            "favorite": att.get("favorite")
+        })
+    return {"mockPlaces": mockPlaces}
+
 def insert_into_supabase(table: str, data: dict, success_msg: str):
     try:
         response = supabase.from_(table).insert(data).execute()
@@ -477,7 +500,6 @@ def insert_into_supabase(table: str, data: dict, success_msg: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 # Add favorite into supabase
@@ -537,46 +559,160 @@ def add_place(place: Place):
 
 # Add folder into supabase
 class Folder(BaseModel):
-    folderid: str
     foldername: str
     uid: str
     timecreated: str
     timeclosed: str
     status: str
-    pollstatus: str
+    pollstatus: bool
 
 @app.post("/folder")
 def add_folder(folder: Folder):
     return insert_into_supabase("folder", folder.dict(), "Folder added successfully")
 
 # Add folder's attraction into supabase
-class FoldeAtt(BaseModel):
+class FolderAtt(BaseModel):
     folderid: str
     attid: str
 
-@app.post("/folerattraction")
-def add_folder(folerattraction: FoldeAtt):
-    return insert_into_supabase("folerattraction", folerattraction.dict(), "Folder's attraction added successfully")
+@app.post("/folderattraction")
+def add_folderattraction(folderattraction: FolderAtt):
+    return insert_into_supabase("folderattraction", folderattraction.dict(), "Folder's attraction added successfully")
 
-@app.get("/mock-data")
-async def get_mock_data():
-    # Fetch all attractions
-    response = supabase.table("attraction").select("*").execute()
-    attractions = response.data
+@app.get("/folders")
+def list_folders(uid: str):
+    """
+    Return all folders for a given user uid.
+    """
+    res = supabase.table("folder") \
+        .select("*") \
+        .eq("uid", uid) \
+        .order("timecreated", desc=True) \
+        .execute()
+    return {"data": res.data}
 
-    # Convert to mockPlaces format
-    mockPlaces = []
-    for att in attractions:
-        mockPlaces.append({
-            "id": str(att.get("attid")),
-            "name": att.get("name"),
-            "location": att.get("location"),
-            "image": att.get("attpicture"),
-            "rating": float(att.get("rating")),
-            "category": att.get("category"),
-            "price": att.get("price"),
-            "environment": att.get("environment"),
-            "favorite": att.get("favorite")
-        })
-    return {"mockPlaces": mockPlaces}
-    
+@app.get("/folder/{folderid}")
+def get_folder_detail(folderid: str):
+    """
+    Return folder row + its attraction rows (with picture).
+    """
+    # 1) Get folder
+    folder_res = supabase.table("folder") \
+        .select("*") \
+        .eq("folderid", folderid) \
+        .single() \
+        .execute()
+
+    # 2) Get attraction IDs from folderattraction
+    fa_res = supabase.table("folderattraction") \
+        .select("attid") \
+        .eq("folderid", folderid) \
+        .execute()
+
+    fa_rows = fa_res.data or []
+    att_ids = [row["attid"] for row in fa_rows]
+
+    # 3) Get attraction details (with picture)
+    attractions = []
+    if att_ids:
+        # Adjust columns if your names are slightly different
+        at_res = supabase.table("attraction") \
+            .select("attid, name, attpicture") \
+            .in_("attid", att_ids) \
+            .execute()
+        attractions = at_res.data or []
+
+    return {
+        "folder": folder_res.data,
+        "attractions": attractions,  # each has { attid, attname, attpicture }
+    }
+
+@app.get("/folders-with-preview")
+def list_folders_with_preview(uid: str):
+    folder_res = supabase.table("folder") \
+        .select("*") \
+        .eq("uid", uid) \
+        .order("timecreated", desc=True) \
+        .execute()
+
+    folders = folder_res.data or []
+
+    for folder in folders:
+        fid = folder["folderid"]
+
+        fa_res = supabase.table("folderattraction") \
+            .select("attid") \
+            .eq("folderid", fid) \
+            .limit(3) \
+            .execute()
+
+        fa_rows = fa_res.data or []
+        att_ids = [row["attid"] for row in fa_rows]
+
+        preview_atts = []
+        if att_ids:
+          at_res = supabase.table("attraction") \
+              .select("attid, name, attpicture") \
+              .in_("attid", att_ids) \
+              .execute()
+          preview_atts = at_res.data or []
+
+        folder["preview_attractions"] = preview_atts
+
+    return {"data": folders}
+
+@app.delete("/folder/{folderid}")
+def delete_folder(folderid: str):
+
+    # 1) Delete folderattraction rows first (foreign key)
+    supabase.table("folderattraction") \
+        .delete() \
+        .eq("folderid", folderid) \
+        .execute()
+
+    # 2) Delete the folder
+    res = supabase.table("folder") \
+        .delete() \
+        .eq("folderid", folderid) \
+        .execute()
+
+    return {"message": "Folder deleted", "data": res.data}
+
+# Add voting into supabase
+class Voting(BaseModel):
+    folderid: str
+    attid: str
+    voter: str
+    timevoted: str
+
+@app.post("/voting")
+def voting(voting: Voting):
+    return insert_into_supabase("voting", voting.dict(), "Voted successfully")
+
+@app.get("/voting/{folderid}")
+def get_votes(folderid: str):
+    """
+    Return all votes for a folder.
+    Frontend will aggregate counts per attraction.
+    """
+    res = supabase.table("voting") \
+        .select("*") \
+        .eq("folderid", folderid) \
+        .execute()
+    return {"data": res.data or []} 
+
+class FolderEndUpdate(BaseModel):
+    timeclosed: str
+    pollstatus: bool
+
+@app.patch("/folder/{folderid}/end")
+def end_folder(folderid: str, payload: FolderEndUpdate):
+    res = supabase.table("folder") \
+        .update({
+            "timeclosed": payload.timeclosed,
+            "pollstatus": payload.pollstatus,
+        }) \
+        .eq("folderid", folderid) \
+        .execute()
+
+    return {"message": "Voting ended", "data": res.data[0] if res.data else None}

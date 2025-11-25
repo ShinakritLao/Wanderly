@@ -10,78 +10,129 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
+const API_BASE_URL = "http://127.0.0.1:8081";
+
+const getUidFromJWT = () => {
+  try {
+    const token = localStorage.getItem("jwt");
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.sub;
+  } catch (err) {
+    console.error("Failed to get uid from JWT:", err);
+    return null;
+  }
+};
 
 const Voting = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { folderId } = route.params;
+
   const [folder, setFolder] = useState(null);
-  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
+  const [attractions, setAttractions] = useState([]);
+  const [selectedAttids, setSelectedAttids] = useState([]); // MULTI SELECT
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await AsyncStorage.getItem("folders");
-        const folders = data ? JSON.parse(data) : [];
-        const found = folders.find((f) => f.id === folderId);
-        if (!found) {
-          Alert.alert("Not found", "Folder not found");
+        const res = await fetch(`${API_BASE_URL}/folder/${folderId}`);
+        if (!res.ok) {
+          console.error("Failed to load folder for voting:", await res.text());
+          Alert.alert("Error", "Folder not found");
           navigation.goBack();
           return;
         }
-        setFolder(found);
+        const json = await res.json();
+        setFolder(json.folder);
+        setAttractions(Array.isArray(json.attractions) ? json.attractions : []);
       } catch (err) {
-        console.error(err);
+        console.error("Voting load error:", err);
+        Alert.alert("Error", "Could not load folder for voting.");
+        navigation.goBack();
       }
     };
     load();
   }, [folderId, navigation]);
 
-  const selectPlace = (placeId) => {
-    setSelectedPlaceId(placeId === selectedPlaceId ? null : placeId);
+  // MULTIPLE SELECTION
+  const selectPlace = (attid) => {
+    setSelectedAttids((prev) => {
+      if (prev.includes(attid)) {
+        return prev.filter((id) => id !== attid);
+      }
+      return [...prev, attid];
+    });
   };
 
+  // SUBMIT MULTIPLE VOTES
   const submitVote = async () => {
-    if (!selectedPlaceId) {
-      Alert.alert("Choose one", "Please pick a place to vote for.");
+    if (selectedAttids.length === 0) {
+      Alert.alert("Choose at least one", "Please pick at least one place.");
       return;
     }
+    if (!folder) return;
+
     setIsSubmitting(true);
+
     try {
-      const stored = await AsyncStorage.getItem("folders");
-      const folders = stored ? JSON.parse(stored) : [];
-      const idx = folders.findIndex((f) => f.id === folderId);
-      if (idx === -1) throw new Error("Folder not found");
+      const uid = getUidFromJWT() || "anonymous";
+      const nowIso = new Date().toISOString();
 
-      // increment vote
-      const votes = folders[idx].votes || {};
-      votes[selectedPlaceId] = (votes[selectedPlaceId] || 0) + 1;
-      folders[idx].votes = votes;
+      for (const attid of selectedAttids) {
+        const payload = {
+          folderid: folder.folderid,
+          attid: attid,
+          voter: uid,
+          timevoted: nowIso,
+        };
 
-      await AsyncStorage.setItem("folders", JSON.stringify(folders));
+        await fetch(`${API_BASE_URL}/voting`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
 
-      Alert.alert("Thanks!", "Your vote has been recorded.");
+      Alert.alert("Thanks!", "Your votes have been recorded.");
       navigation.goBack();
     } catch (err) {
       console.error("Vote error:", err);
-      Alert.alert("Error", "Could not submit vote.");
+      Alert.alert("Error", "Could not submit votes.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (!folder) return null;
+
+  const ended =
+    folder.timeclosed && new Date(folder.timeclosed) <= new Date();
+
   const renderPlace = ({ item }) => {
-    const selected = selectedPlaceId === item.id;
+    const attid = item.attid;
+    const selected = selectedAttids.includes(attid);
+    const title = item.name || `Attraction ${attid}`;
+
     return (
-      <TouchableOpacity style={[styles.chooseRow, selected && styles.chooseSelected]} onPress={() => selectPlace(item.id)}>
-        <Image source={{ uri: item.image }} style={styles.chooseImage} />
+      <TouchableOpacity
+        style={[styles.chooseRow, selected && styles.chooseSelected]}
+        onPress={() => selectPlace(attid)}
+      >
+        {item.attpicture ? (
+          <Image source={{ uri: item.attpicture }} style={styles.chooseImage} />
+        ) : (
+          <View style={[styles.chooseImage, { backgroundColor: "#ccc" }]} />
+        )}
+
         <View style={styles.chooseContent}>
-          <Text style={styles.chooseTitle}>{item.name}</Text>
+          <Text style={styles.chooseTitle}>{title}</Text>
         </View>
+
+        {/* Checkbox */}
         <View style={[styles.radio, selected && styles.radioSelected]}>
           {selected && <Text style={styles.radioInner}>✓</Text>}
         </View>
@@ -89,14 +140,9 @@ const Voting = () => {
     );
   };
 
-  if (!folder) return null;
-
-  // if poll ended, prevent voting
-  const ended = new Date(folder.endDate) <= new Date();
-
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>{folder.name}</Text>
+      <Text style={styles.header}>{folder.foldername}</Text>
 
       {ended ? (
         <View style={styles.ended}>
@@ -105,15 +151,18 @@ const Voting = () => {
       ) : null}
 
       <FlatList
-        data={folder.places}
-        keyExtractor={(item) => item.id.toString()}
+        data={attractions}
+        keyExtractor={(item) => item.attid}
         renderItem={renderPlace}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 30 }}
       />
 
       <TouchableOpacity
-        style={[styles.voteBtn, (ended || !selectedPlaceId) && { opacity: 0.5 }]}
-        disabled={ended || !selectedPlaceId || isSubmitting}
+        style={[
+          styles.voteBtn,
+          (ended || selectedAttids.length === 0 || isSubmitting) && { opacity: 0.5 },
+        ]}
+        disabled={ended || selectedAttids.length === 0 || isSubmitting}
         onPress={submitVote}
       >
         <Text style={styles.voteBtnText}>Vote</Text>
@@ -124,7 +173,14 @@ const Voting = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
-  header: { fontSize: 28, fontWeight: "800", paddingHorizontal: 20, paddingTop: 18, marginBottom: 8, color: "#11468F" },
+  header: {
+    fontSize: 28,
+    fontWeight: "800",
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    marginBottom: 8,
+    color: "#11468F",
+  },
   chooseRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -163,7 +219,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   voteBtnText: { color: "#fff", fontWeight: "800", fontSize: 18 },
-  ended: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: "#F7EAEA", marginHorizontal: 20, borderRadius: 10, marginTop: 10 },
+  ended: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#F7EAEA",
+    marginHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 10,
+  },
 });
 
 export default Voting;

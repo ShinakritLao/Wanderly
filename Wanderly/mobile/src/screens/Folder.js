@@ -8,33 +8,67 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  // Platform,
   Alert,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+
+// 🔧 Change this to your FastAPI URL if different
+const API_BASE_URL = 'http://127.0.0.1:8081';
+
+// Helper to get uid from JWT in localStorage
+const getUidFromJWT = () => {
+  try {
+    const token = localStorage.getItem('jwt');
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub; // uid is in `sub`
+  } catch (err) {
+    console.error('Failed to get uid from JWT:', err);
+    return null;
+  }
+};
 
 const Folder = () => {
   const navigation = useNavigation();
   const [folders, setFolders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Load folders from AsyncStorage
-  useEffect(() => {
-    const loadFolders = async () => {
-      try {
-        const data = await AsyncStorage.getItem('folders');
-        if (data) {
-          setFolders(JSON.parse(data));
-        }
-      } catch (err) {
-        console.error('Failed to load folders:', err);
+  // Load folders from API (with preview attractions)
+  const loadFolders = async () => {
+    const uid = getUidFromJWT();
+    if (!uid) {
+      console.warn('No uid found, user not logged in?');
+      setFolders([]);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 👇 This endpoint should return:
+      // { data: [ { folderid, foldername, timecreated, ..., preview_attractions: [ { attid, attname, attpicture }, ... ] } ] }
+      const res = await fetch(
+        `${API_BASE_URL}/folders-with-preview?uid=${encodeURIComponent(uid)}`
+      );
+
+      if (!res.ok) {
+        console.error('Failed to load folders:', await res.text());
+        return;
       }
-    };
 
+      const json = await res.json();
+      setFolders(Array.isArray(json.data) ? json.data : []);
+    } catch (err) {
+      console.error('Failed to load folders:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener('focus', loadFolders);
     loadFolders();
-
     return unsubscribe;
   }, [navigation]);
 
@@ -44,54 +78,78 @@ const Folder = () => {
 
   const handleDelete = async (folderId) => {
     try {
-      const updatedFolders = folders.filter(f => f.id !== folderId);
-      await AsyncStorage.setItem('folders', JSON.stringify(updatedFolders));
-      setFolders(updatedFolders);
+      const res = await fetch(`${API_BASE_URL}/folder/${folderId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        console.error('Failed to delete folder:', await res.text());
+        Alert.alert('Error', 'Failed to delete folder on server.');
+        return;
+      }
+
+      setFolders((prev) => prev.filter((f) => f.folderid !== folderId));
     } catch (err) {
       console.error('Failed to delete folder:', err);
+      Alert.alert('Error', 'Failed to delete folder.');
     }
   };
 
-  const renderFolder = ({ item }) => (
-    <View style={styles.folderCard}>
-      <TouchableOpacity
-        style={{ flex: 1 }}
-        onPress={() => navigation.navigate('FolderDetail', { folderId: item.id })}
-      >
-        <View style={styles.folderHeader}>
-          <Text style={styles.folderTitle}>{item.name}</Text>
-        </View>
-        <View style={styles.folderImages}>
-          {item.places.slice(0, 3).map((place, idx) => (
-            <Image key={idx} source={{ uri: place.image }} style={styles.previewImage} />
-          ))}
-        </View>
-      </TouchableOpacity>
+  const renderFolder = ({ item }) => {
+    // Preview attractions come from backend: [{ attid, attname, attpicture }]
+    const previews = Array.isArray(item.preview_attractions)
+      ? item.preview_attractions.slice(0, 3)
+      : [];
 
-      <View style={{ flexDirection: 'row', position: 'absolute', top: 10, right: 10, gap: 8 }}>
+    return (
+      <View style={styles.folderCard}>
         <TouchableOpacity
-          style={[styles.iconButton, { backgroundColor: '#2196F3' }]}
-          onPress={async () => {
-            const link = `https://wanderly-public.netlify.app/public/folder/${item.id}`;
-            await Clipboard.setStringAsync(link);
-            // if (Platform.OS === 'web') {
+          style={{ flex: 1 }}
+          onPress={() => navigation.navigate('FolderDetail', { folderId: item.folderid })}
+        >
+
+          <View style={styles.folderImages}>
+            {previews.length > 0 ? (
+              previews.map((att, idx) => (
+                <Image
+                  key={att.attid || idx}
+                  source={{ uri: att.attpicture }}
+                  style={styles.previewImage}
+                />
+              ))
+            ) : (
+              <Text style={{ color: '#777', fontSize: 12 }}>No places yet</Text>
+            )}
+          </View>
+        </TouchableOpacity>
+
+        <View style={{ flexDirection: 'row', position: 'absolute', top: 10, right: 10, gap: 8 }}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: '#2196F3' }]}
+            onPress={async () => {
+              const link = `https://wanderly-public.netlify.app/public/folder/${item.folderid}`;
+              await Clipboard.setStringAsync(link);
               alert('Link copied!');
-            // } else {
-            //   Alert.alert('Link copied!', 'You can now share this folder link.');
-            // }
-          }}
-        >
-          <Text style={{ fontSize: 18, color: '#FFF' }}>🔗</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDelete(item.id)}
-        >
-          <Text style={{ fontSize: 20, color: '#FFF' }}>🗑️</Text>
-        </TouchableOpacity>
+            }}
+          >
+            <Text style={{ fontSize: 18, color: '#FFF' }}>🔗</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => {
+              const ok = window.confirm('Delete folder? This cannot be undone.');
+              if (ok) {
+                handleDelete(item.folderid);
+              }
+            }}
+          >
+            <Text style={{ fontSize: 20, color: '#FFF' }}>🗑️</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -108,11 +166,15 @@ const Folder = () => {
         <Text style={{ color: '#2196F3' }}>plan</Text>
       </Text>
 
-      {folders.length > 0 ? (
+      {loading ? (
+        <View style={styles.emptyContainer}>
+          <Text>Loading folders...</Text>
+        </View>
+      ) : folders.length > 0 ? (
         <FlatList
           data={folders}
           renderItem={renderFolder}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.folderid}
           contentContainerStyle={styles.listContainer}
         />
       ) : (
@@ -124,9 +186,7 @@ const Folder = () => {
 
       <TouchableOpacity style={styles.createButton} onPress={handleCreate}>
         <Text style={styles.createText}>Create New</Text>
-        <View style={styles.plusCircle}>
-          <Text style={{ fontSize: 18, color: '#1B1462' }}>➕</Text>
-        </View>
+        <Text style={{ fontSize: 18, color: '#1B1462' }}>➕</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -149,7 +209,8 @@ const styles = StyleSheet.create({
   },
   folderHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   folderTitle: { fontSize: 18, fontWeight: '700', color: '#1B1462' },
-  folderImages: { flexDirection: 'row', marginTop: 10 },
+  folderDate: { fontSize: 12, color: '#555' },
+  folderImages: { flexDirection: 'row', marginTop: 10, alignItems: 'center' },
   previewImage: { width: 80, height: 80, borderRadius: 40, marginRight: 10 },
   iconButton: {
     backgroundColor: '#2196F3',
@@ -175,18 +236,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingVertical: 10,
     paddingHorizontal: 25,
-    marginBottom: 30
+    marginBottom: 30,
   },
   createText: { fontSize: 16, fontWeight: '600', color: '#1B1462', marginRight: 8 },
-  plusCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 1.5,
-    borderColor: '#1B1462',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
 
 export default Folder;
