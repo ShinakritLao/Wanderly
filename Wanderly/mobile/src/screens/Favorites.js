@@ -11,7 +11,7 @@ import {
   Dimensions,
   PanResponder,
 } from 'react-native';
-import { Platform } from 'react-native';
+// import { Platform } from 'react-native';
 import { useFavorites } from '../context/FavoritesContext';
 
 const { width } = Dimensions.get('window');
@@ -115,7 +115,7 @@ const Favorites = () => {
             style={styles.deleteButton}
             onPress={handleDelete}
           >
-            <Text style={{ fontSize: 24, color: '#FFF' }}>{Platform.OS === 'web' ? '🗑️' : '🗑️'}</Text>
+            <Text style={{ fontSize: 24, color: '#FFF' }}>🗑️</Text>
           </TouchableOpacity>
         </View>
 
@@ -133,7 +133,7 @@ const Favorites = () => {
           <View style={styles.cardContent}>
             <Text style={styles.placeName}>{item.name}</Text>
             <View style={styles.locationContainer}>
-              <Text style={{ fontSize: 12, color: '#FFF' }}>{Platform.OS === 'web' ? '📍' : '📍'}</Text>
+              <Text style={{ fontSize: 12, color: '#FFF' }}>📍</Text>
               <Text style={styles.locationText}>{item.location}</Text>
             </View>
             <Text style={styles.description} numberOfLines={3}>
@@ -169,7 +169,7 @@ const Favorites = () => {
           favorites.map((item) => <FavoriteCard key={item.id} item={item} />)
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={{ fontSize: 60, color: '#CCC' }}>{Platform.OS === 'web' ? '🤍' : '🤍'}</Text>
+            <Text style={{ fontSize: 60, color: '#CCC' }}>🤍</Text>
             <Text style={styles.emptyText}>No favorites yet</Text>
             <Text style={styles.emptySubtext}>
               Add places to your favorites from Home or Tinder page

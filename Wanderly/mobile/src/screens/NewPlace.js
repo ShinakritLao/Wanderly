@@ -73,7 +73,7 @@ setImagePreview(result.assets[0].uri);
       const blob = await response.blob();
 
       const { error } = await supabase.storage
-        .from('attraction')
+        .from('Attraction Pictures')
         .upload(filename, blob, { cacheControl: '3600', upsert: false });
 
       if (error) {
@@ -82,7 +82,7 @@ setImagePreview(result.assets[0].uri);
         return;
       }
 
-      const publicUrl = supabase.storage.from('attraction').getPublicUrl(filename).data.publicUrl;
+      const publicUrl = supabase.storage.from('Attraction Pictures').getPublicUrl(filename).data.publicUrl;
       
       const res = await fetch("http://127.0.0.1:8081/attraction", {
         method: "POST",

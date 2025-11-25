@@ -467,8 +467,9 @@ def insert_into_supabase(table: str, data: dict, success_msg: str):
     try:
         response = supabase.from_(table).insert(data).execute()
 
-        if response.error:
-            raise HTTPException(status_code=400, detail=str(response.error))
+        # Remove .error check; instead check HTTP status
+        if not hasattr(response, "data") or response.data is None:
+            raise HTTPException(status_code=400, detail="Supabase insert failed")
 
         return {
             "message": success_msg,
@@ -476,6 +477,8 @@ def insert_into_supabase(table: str, data: dict, success_msg: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 # Add favorite into supabase
 class Favorite(BaseModel):
@@ -486,6 +489,37 @@ class Favorite(BaseModel):
 @app.post("/favorites")
 def add_favorite(fav: Favorite):
     return insert_into_supabase("favorite", fav.dict(), "Favorite added successfully")
+
+@app.get("/favorites/{uid}")
+def get_user_favorites(uid: str):
+    try:
+        response = supabase.from_("favorite").select("attid").eq("uid", uid).execute()
+
+        # response.data contains the favorites
+        if response.data is None:
+            return []
+
+        # make sure it is always a list
+        if not isinstance(response.data, list):
+            raise HTTPException(status_code=500, detail="Unexpected Supabase response format")
+
+        return response.data
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+from fastapi import Body
+
+@app.delete("/favorites/{uid}")
+def remove_favorite(uid: str, body: dict = Body(...)):
+    attid = body.get("attid")
+    if not attid:
+        raise HTTPException(status_code=400, detail="attid is required")
+    try:
+        response = supabase.from_("favorite").delete().eq("uid", uid).eq("attid", attid).execute()
+        return {"message": "Favorite removed successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Add attraction into supabase
 class Place(BaseModel):
@@ -545,3 +579,4 @@ async def get_mock_data():
             "favorite": att.get("favorite")
         })
     return {"mockPlaces": mockPlaces}
+    

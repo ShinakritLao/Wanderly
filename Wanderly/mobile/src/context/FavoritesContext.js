@@ -1,86 +1,151 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// Create the context
 const FavoritesContext = createContext();
-const BackendURL = 'http://127.0.0.1:8081'
+const BackendURL = 'http://127.0.0.1:8081'; // adjust if needed
 
-// Custom hook to use the context
 export const useFavorites = () => {
-const context = useContext(FavoritesContext);
-if (!context) {
-throw new Error('useFavorites must be used within a FavoritesProvider');
-}
-return context;
+  const context = useContext(FavoritesContext);
+  if (!context) {
+    throw new Error('useFavorites must be used within a FavoritesProvider');
+  }
+  return context;
 };
 
-// Provider component
+const getUidFromJWT = () => {
+  try {
+    const token = localStorage.getItem('jwt'); // get JWT from localStorage
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub; // uid is in `sub`
+  } catch (err) {
+    console.error('Failed to get uid from JWT:', err);
+    return null;
+  }
+};
+
 export const FavoritesProvider = ({ children }) => {
-const [places, setPlaces] = useState([]);
+  const [places, setPlaces] = useState([]);
 
-// Fetch places from backend on mount
-useEffect(() => {
-const fetchPlaces = async () => {
-try {
-const res = await fetch(`${BackendURL}/mock-data`); // adjust URL if needed
-const data = await res.json();
-setPlaces(data.mockPlaces || []);
-} catch (error) {
-console.error('Error fetching places:', error);
-}
-};
-fetchPlaces();
+  // Fetch places from backend
+  useEffect(() => {
+  const fetchPlacesAndFavorites = async () => {
+    try {
+      // Fetch places
+      const resPlaces = await fetch(`${BackendURL}/mock-data`);
+      const data = await resPlaces.json();
+      let loadedPlaces = data.mockPlaces || [];
+
+      // Fetch user's favorites once
+      const uid = getUidFromJWT();
+      if (uid) {
+        const resFav = await fetch(`${BackendURL}/favorites/${uid}`);
+        const favData = await resFav.json();
+
+        loadedPlaces = loadedPlaces.map(p => ({
+          ...p,
+          favorite: favData.some(f => String(f.attid) === String(p.id)) ? 1 : 0
+        }));
+      }
+
+      setPlaces(loadedPlaces);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchPlacesAndFavorites();
 }, []);
 
-// Toggle favorite status
-const toggleFavorite = (placeId) => {
-setPlaces(prevPlaces =>
-prevPlaces.map(place =>
-place.id === placeId
-? { ...place, favorite: place.favorite === 1 ? 0 : 1 }
-: place
-)
-);
-};
 
-// Get all favorited places
-const getFavorites = () => {
-return places.filter(place => place.favorite === 1);
-};
+  const toggleFavorite = async (placeId) => {
+    const uid = getUidFromJWT();
+    if (!uid) {
+      alert('Please log in first');
+      return;
+    }
 
-// Remove from favorites
-const removeFavorite = (placeId) => {
-setPlaces(prevPlaces =>
-prevPlaces.map(place =>
-place.id === placeId ? { ...place, favorite: 0 } : place
-)
-);
-};
+    const place = places.find(p => String(p.id) === String(placeId));
+    if (!place) return;
 
-// Add new place
-const addPlace = (newPlaceData) => {
-const newPlace = {
-id: Math.max(...places.map(p => p.id), 0) + 1,
-name: newPlaceData.name,
-location: newPlaceData.location,
-image: newPlaceData.image || '[https://via.placeholder.com/400x300?text=No+Image](https://via.placeholder.com/400x300?text=No+Image)',
-description: newPlaceData.description,
-favorite: 1, // Add as favorite by default
-verified: typeof newPlaceData.verified === 'boolean' ? newPlaceData.verified : false,
-};
-setPlaces(prevPlaces => [newPlace, ...prevPlaces]);
-};
+    const newFavoriteStatus = place.favorite === 1 ? 0 : 1;
 
-const value = {
-places,
-toggleFavorite,
-getFavorites,
-removeFavorite,
-addPlace,
-};
+    // Optimistic update
+    setPlaces(prev =>
+      prev.map(p => (String(p.id) === String(placeId) ? { ...p, favorite: newFavoriteStatus } : p))
+    );
 
-return (
-<FavoritesContext.Provider value={value}>
-{children}
-</FavoritesContext.Provider>
-);
+    try {
+      if (newFavoriteStatus === 1) {
+        // Add to favorites
+        const res = await fetch(`${BackendURL}/favorites`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid,
+            attid: placeId,
+            timecreated: new Date().toISOString()
+          })
+        });
+
+        if (!res.ok) {
+          const result = await res.json();
+          console.error('Failed to add favorite:', result.detail || result);
+          // Revert
+          setPlaces(prev =>
+            prev.map(p => (String(p.id) === String(placeId) ? { ...p, favorite: 0 } : p))
+          );
+        }
+      } else {
+        // Remove from favorites
+        const res = await fetch(`${BackendURL}/favorites/${uid}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ attid: placeId })
+        });
+
+        if (!res.ok) {
+          const result = await res.json();
+          console.error('Failed to remove favorite:', result.detail || result);
+          // Revert
+          setPlaces(prev =>
+            prev.map(p => (String(p.id) === String(placeId) ? { ...p, favorite: 1 } : p))
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      // Revert in case of network error
+      setPlaces(prev =>
+        prev.map(p => (String(p.id) === String(placeId) ? { ...p, favorite: place.favorite } : p))
+      );
+    }
+  };
+
+
+  const getFavorites = () => places.filter(p => p.favorite === 1);
+
+  const removeFavorite = (placeId) => {
+    setPlaces(prev => prev.map(p => p.id === placeId ? { ...p, favorite: 0 } : p));
+  };
+
+  const addPlace = (newPlaceData) => {
+    const newPlace = {
+      id: Math.max(...places.map(p => p.id), 0) + 1,
+      name: newPlaceData.name,
+      location: newPlaceData.location,
+      image: newPlaceData.image || 'https://via.placeholder.com/400x300?text=No+Image',
+      description: newPlaceData.description,
+      favorite: 1,
+      verified: typeof newPlaceData.verified === 'boolean' ? newPlaceData.verified : false,
+    };
+    setPlaces(prev => [newPlace, ...prev]);
+  };
+
+  const value = { places, toggleFavorite, getFavorites, removeFavorite, addPlace };
+
+  return (
+    <FavoritesContext.Provider value={value}>
+      {children}
+    </FavoritesContext.Provider>
+  );
 };
