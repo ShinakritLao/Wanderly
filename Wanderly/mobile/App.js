@@ -14,6 +14,7 @@ const linking = {
 };
 
 export default function App() {
+  console.log("App mounted successfully");
   return (
     // Wrap with FavoritesProvider to make context available throughout the app
     <FavoritesProvider>

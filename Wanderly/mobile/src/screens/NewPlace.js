@@ -6,6 +6,7 @@ import { SUPABASE_URL, SUPABASE_KEY } from '@env';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+URL_ = process.env.EXPO_PUBLIC_API_URL
 
 const NewPlace = ({ navigation }) => {
   const { addPlace } = useFavorites();
@@ -84,7 +85,7 @@ setImagePreview(result.assets[0].uri);
 
       const publicUrl = supabase.storage.from('Attraction Pictures').getPublicUrl(filename).data.publicUrl;
       
-      const res = await fetch("https://wanderly-puy6.onrender.com/attraction", {
+      const res = await fetch(`${URL_}/attraction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

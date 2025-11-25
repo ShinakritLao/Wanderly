@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const FavoritesContext = createContext();
-const BackendURL = 'https://wanderly-puy6.onrender.com'; // adjust if needed
+const BackendURL = process.env.EXPO_PUBLIC_API_URL;
 
 export const useFavorites = () => {
   const context = useContext(FavoritesContext);

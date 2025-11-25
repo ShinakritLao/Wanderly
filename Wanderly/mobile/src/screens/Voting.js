@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
-const API_BASE_URL = "https://wanderly-puy6.onrender.com";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const getUidFromJWT = () => {
   try {
@@ -27,6 +27,7 @@ const getUidFromJWT = () => {
 };
 
 const Voting = () => {
+  console.log("Voting successfully");
   const route = useRoute();
   const navigation = useNavigation();
   const { folderId } = route.params;

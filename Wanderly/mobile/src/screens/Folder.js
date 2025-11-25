@@ -14,7 +14,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useNavigation } from '@react-navigation/native';
 
 // 🔧 Change this to your FastAPI URL if different
-const API_BASE_URL = 'https://wanderly-puy6.onrender.com';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // Helper to get uid from JWT in localStorage
 const getUidFromJWT = () => {
@@ -127,7 +127,7 @@ const Folder = () => {
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: '#2196F3' }]}
             onPress={async () => {
-              const link = `https://wanderly-public.netlify.app/public/folder/${item.folderid}`;
+              const link = `${API_BASE_URL}/public/folder/${item.folderid}`;
               await Clipboard.setStringAsync(link);
               alert('Link copied!');
             }}

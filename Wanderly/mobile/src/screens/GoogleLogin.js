@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Alert, TouchableOpacity, 
-  // Platform
- } from "react-native";
+import { View, ActivityIndicator, Alert, TouchableOpacity, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGoogleAuth } from "../services/googleConfig";
 import { signInWithGoogle } from "../services/api";
@@ -26,15 +24,15 @@ export default function GoogleLogin({ navigation, refCallback }) {
           let credential;
 
           // Choose token type based on platform
-          // if (Platform.OS === "web") {
+          if (Platform.OS === "web") {
             const accessToken = response.authentication?.accessToken;
             if (!accessToken) throw new Error("Missing access token (web)");
             credential = GoogleAuthProvider.credential(null, accessToken);
-          // } else {
-          //   const idToken = response.authentication?.idToken;
-          //   if (!idToken) throw new Error("Missing ID token (mobile)");
-          //   credential = GoogleAuthProvider.credential(idToken);
-          // }
+          } else {
+            const idToken = response.authentication?.idToken;
+            if (!idToken) throw new Error("Missing ID token (mobile)");
+            credential = GoogleAuthProvider.credential(idToken);
+          }
 
           // Sign in with Firebase
           const firebaseUser = await signInWithCredential(auth, credential);

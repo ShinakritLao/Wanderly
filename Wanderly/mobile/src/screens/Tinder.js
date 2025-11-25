@@ -37,6 +37,7 @@ const PRICE_RANGES = [
 ];
 
 const Tinder = () => {
+  console.log("Tinder successfully");
   const { places, toggleFavorite } = useFavorites();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFilter, setShowFilter] = useState(false);

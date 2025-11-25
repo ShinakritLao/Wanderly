@@ -19,6 +19,7 @@ import { useFavorites } from '../context/FavoritesContext';
 const { width, height } = Dimensions.get('window');
 
 const Home = () => {
+  console.log("Home successfully");
   const [searchText, setSearchText] = useState('');
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
