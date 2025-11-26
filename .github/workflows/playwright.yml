@@ -20,10 +20,10 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: cd Wanderly/ui-tests && npm install
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: cd Wanderly/ui-tests && npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: cd Wanderly/ui-tests && npx playwright test
