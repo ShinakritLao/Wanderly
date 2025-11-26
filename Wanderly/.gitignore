@@ -1,41 +1,24 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# Node modules
 node_modules/
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
+# Test results
+ui-tests/test-results/
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# Logs
+*.log
 
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# OS generated files
 .DS_Store
-*.pem
+Thumbs.db
 
-# local env files
-.env*.local
+# Environment files
+.env
+.env.*
 
-# typescript
-*.tsbuildinfo
+# Misc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# generated native folders
-/ios
-/android
+# Ignore zip files in test-results
+ui-tests/test-results/**/*.zip
