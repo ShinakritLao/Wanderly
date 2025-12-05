@@ -1,4 +1,3 @@
-
 import { test, expect } from '@playwright/test';
 const path = require('path');
 const filePath = path.join(__dirname, '../Picture/imagemango.png');
@@ -14,95 +13,100 @@ async function mockLogin(page) {
 
 }
 
-test('TC-U01: User can view profile', async ({ page }) => {
+test('TC-F01: User can Select filter', async ({ page }) => {
   await page.goto('https://amazing-gingersnap-d4b59a.netlify.app/SignIn');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('shinshinakrit@gmail.com');
   await page.getByRole('textbox', { name: 'Email' }).press('Tab');
   await page.getByRole('textbox', { name: 'Password' }).fill('12345678');
   await page.locator('div').filter({ hasText: /^Sign in$/ }).first().click();
-  await page.getByRole('button', { name: '👤' }).click();
-  await page.getByText('Log out').click();
+  await page.getByRole('button', { name: '➕' }).click();
+  await page.getByText('🎚️').click();
+  await page.getByText('Culture').first().click();
+  await page.getByText('Confirm').click();
+  await page.getByText('Santorini').nth(2).click();
   await page.screenshot({
-    path: 'test-results/TC-U01_User_can_view_profile.png',
+    path: 'test-results/TC-F01_User_can_Select_filter.png',
     fullPage: true,
   });
 });
 
-test('TC-U02: User cant access profile page without logging in', async ({ page }) => {
-  await page.goto('https://amazing-gingersnap-d4b59a.netlify.app/MainTabs/Profile');
-  await page.getByRole('textbox', { name: 'Email' }).click();
-  await page.screenshot({
-    path: 'test-results/TC-U02_User_cant_access_profile_page_without_logging_in.png',
-    fullPage: true,
-  });
-});
-
-test('TC-U03: User can edit profile name', async ({ page }) => {
+test('TC-F02: User can Select multiple filters', async ({ page }) => {
   await page.goto('https://amazing-gingersnap-d4b59a.netlify.app/SignIn');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('shinshinakrit@gmail.com');
   await page.getByRole('textbox', { name: 'Email' }).press('Tab');
   await page.getByRole('textbox', { name: 'Password' }).fill('12345678');
   await page.locator('div').filter({ hasText: /^Sign in$/ }).first().click();
-  await page.getByRole('button', { name: '👤' }).click();
-  await page.getByText('✏️').click();
-  await page.getByRole('textbox', { name: 'Enter your name' }).click();
-  await page.getByRole('textbox', { name: 'Enter your name' }).fill('fasafasd');
-  await page.locator('div').filter({ hasText: /^Save$/ }).first().click();
+  await page.getByRole('button', { name: '➕' }).click();
+  await page.getByText('🎚️').click();
+  await page.getByText('Adventure').first().click();
+  await page.locator('div').filter({ hasText: /^Culture$/ }).first().click();
+  await page.getByRole('slider').click();
+  await page.locator('div').filter({ hasText: /^Confirm$/ }).first().click();
+  await page.getByText('Machu Picchu').nth(1).click();
   await page.screenshot({
-    path: 'test-results/TC-U03_User_can_edit_profile_name.png',
+    path: 'test-results/TC-F02_User_can_Select_multiple_filters.png',
     fullPage: true,
   });
 });
 
-test('TC-U04: User can edit profile picture', async ({ page }) => {
+test('TC-F03: The Selected Filter are not matching any place', async ({ page }) => {
   await page.goto('https://amazing-gingersnap-d4b59a.netlify.app/SignIn');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('shinshinakrit@gmail.com');
   await page.getByRole('textbox', { name: 'Email' }).press('Tab');
   await page.getByRole('textbox', { name: 'Password' }).fill('12345678');
   await page.locator('div').filter({ hasText: /^Sign in$/ }).first().click();
-  await page.getByRole('button', { name: '👤' }).click();
-  await page.locator('.css-g5y9jx.r-1i6wzkk.r-lrvibr.r-1loqt21.r-1otgn73.r-1awozwy > .css-g5y9jx.r-1mlwlqe > .css-g5y9jx').click();
-  await page.setInputFiles('input[type="file"]', filePath);
+  await page.getByRole('button', { name: '➕' }).click();
+  await page.getByText('🎚️').click();
+  await page.getByText('Luxury').first().click();
+  await page.getByText('History').click();
+  await page.getByText('Wildlife').click();
+  await page.getByRole('slider').click();
+  await page.locator('div').filter({ hasText: /^Confirm$/ }).first().click();
+  await page.getByText('No more places!').click();
   await page.screenshot({
-    path: 'test-results/TC-U04_User_can_edit_profile_picture.png',
+    path: 'test-results/TC-F03_The_Selected_Filter_are_not_matching_any_place.png',
     fullPage: true,
   });
 });
 
-test('TC-U06: User cant use a name with emoji', async ({ page }) => {
+test('TC-F04: Measure response', async ({ page }) => {
   await page.goto('https://amazing-gingersnap-d4b59a.netlify.app/SignIn');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('shinshinakrit@gmail.com');
   await page.getByRole('textbox', { name: 'Email' }).press('Tab');
   await page.getByRole('textbox', { name: 'Password' }).fill('12345678');
   await page.locator('div').filter({ hasText: /^Sign in$/ }).first().click();
-  await page.getByRole('button', { name: '👤' }).click();
-  await page.getByText('✏️').click();
-  await page.getByRole('textbox', { name: 'Enter your name' }).click();
-  await page.getByRole('textbox', { name: 'Enter your name' }).fill('👤');
-  await page.locator('div').filter({ hasText: /^Save$/ }).first().click();
+  await page.getByRole('button', { name: '➕' }).click();
+  await page.getByText('🎚️').click();
+  await page.getByText('Culture').first().click();
+  await page.getByText('Confirm').click();
+  await page.getByText('Santorini').nth(2).click();
   await page.screenshot({
-    path: 'test-results/TC-U06_User_cant_use_name_with_emoji.png',
+    path: 'test-results/TC-F04_Measure_response.png',
     fullPage: true,
   });
 });
 
-test('TC-U07: User cant change an email', async ({ page }) => {
+test('TC-F05: User can clear the filter', async ({ page }) => {
   await page.goto('https://amazing-gingersnap-d4b59a.netlify.app/SignIn');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('shinshinakrit@gmail.com');
   await page.getByRole('textbox', { name: 'Email' }).press('Tab');
   await page.getByRole('textbox', { name: 'Password' }).fill('12345678');
   await page.locator('div').filter({ hasText: /^Sign in$/ }).first().click();
-  await page.getByRole('button', { name: '👤' }).click();
-  await page.getByText('✏️').click();
-  await page.getByRole('dialog').getByText('No email').click();
-  await page.getByText('Email cannot be changed').click();
+  await page.getByRole('button', { name: '➕' }).click();
+  await page.getByText('🎚️').click();
+  await page.getByText('Culture').first().click();
+  await page.getByText('Confirm').click();
+  await page.getByText('Santorini').nth(2).click();
+  await page.getByText('🎚️').click();
+  await page.locator('div').filter({ hasText: /^Clear All$/ }).first().click();
+  await page.getByText('Mount Fuji').nth(1).click();
   await page.screenshot({
-    path: 'test-results/TC-U07_User_cant_change_email.png',
+    path: 'test-results/TC-F05_User_can_clear_the_filter.png',
     fullPage: true,
   });
 });
